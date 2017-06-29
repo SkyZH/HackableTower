@@ -1,5 +1,2 @@
 export const BACKGROUND_COLOR = 0x000000;
-export const PIXI_SETTINGS = {
-  PRECISION_FRAGMENT: 'highp',
-  RESOLUTION: 2
-};
+export const RESOLUTION = 2;

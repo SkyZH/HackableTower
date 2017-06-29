@@ -1,0 +1,3 @@
+import './scenes';
+
+import './game';

@@ -1,1 +1,2 @@
-import './resize';
+export * from './resize';
+export * from './view';
