@@ -10,16 +10,31 @@ class _SceneManager {
   }
 
   public push(scene: Scene) {
+    scene.onInit();
     this._scenes.push(scene);
+    scene.onStart();
     this.refresh();
   }
 
   public pop() {
+    if (_.isEmpty(this._scenes)) {
+      throw new Error('scene stack already empty');
+    }
+    let _lstScene = _.last(this._scenes);
+    _lstScene.onEnd();
     this._scenes.pop();
+    _lstScene.onDestroy();
     this.refresh();
   }
 
   public goto(scene: Scene) {
+    if (!_.isEmpty(this._scenes)) {
+      let _lstScene = _.last(this._scenes);
+      _lstScene.onEnd();
+      this._scenes.pop();
+      _lstScene.onDestroy();
+    }
+    scene.onInit();
     this._scenes = [scene];
     this.refresh();
   }

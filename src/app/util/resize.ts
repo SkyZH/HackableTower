@@ -2,10 +2,12 @@ import { Observable } from 'rxjs';
 import { renderer } from '../app';
 import { bound } from './view';
 
-export const onResize = () => {
+const onResize = () => {
   const [_width, _height] = bound();
   renderer.resize(_width, _height);
 };
 
+export const resize$ = Observable.fromEvent(window, 'resize');
+
 onResize();
-Observable.fromEvent(window, 'resize').subscribe(onResize);
+resize$.subscribe(onResize);
