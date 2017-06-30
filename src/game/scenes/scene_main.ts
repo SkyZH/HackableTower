@@ -70,7 +70,7 @@ export class Scene_Main extends Scene {
     this.stage.interactive = true;
     this.stage.buttonMode = true;
     this.stage.on('pointerdown', () => {
-      SceneManager.goto(new Scene_Menu);
+      SceneManager.push(Scene_Menu);
       requestFullscreen();
     });
   }
@@ -85,7 +85,6 @@ export class Scene_Main extends Scene {
 
   onStart() {
     super.onStart();
-    
     this.bindEvents();
   }
 }

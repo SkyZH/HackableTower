@@ -21,10 +21,10 @@ export class Scene_Menu extends Scene {
     const window = new Window_Command([
       <Command> { name: '新存档' },
       <Command> { name: '加载游戏' },
-      <Command> { name: '关于' }
+      <Command> { name: '关于', cb: () => { SceneManager.pop(); }}
     ]);
     this.resize$.subscribe(() => {
-      window.width = 400;
+      window.width = 300;
       window.y = this.viewport.height - 100 - window.height;
       window.x = (this.viewport.width - window.width) / 2;
     });

@@ -20,6 +20,7 @@ export class Window_Command extends Window_Selectable {
       fontSize: FONT.FONT_SIZE_TITLE
     });
     this.selected = 0;
+    this.container.interactive = true;
   }
 
   public set commands(commands: Array<Command>) {
@@ -50,13 +51,12 @@ export class Window_Command extends Window_Selectable {
   }
 
   private update_command() {
-    this._select = new PIXI.Rectangle(
+    this.selectBound = new PIXI.Rectangle(
       WINDOW.WINDOW_MARGIN_X,
       this.selected * (FONT.FONT_TITLE_LINE_HEIGHT + WINDOW.WINDOW_COMMAND_MARGIN) + WINDOW.WINDOW_MARGIN_Y,
       this.width - 2 * WINDOW.WINDOW_MARGIN_X,
       FONT.FONT_TITLE_LINE_HEIGHT
     );
-    console.log(this._select);
   }
 
   public update() {
@@ -65,7 +65,29 @@ export class Window_Command extends Window_Selectable {
     this.update_text();
   }
 
+  private check_pos(pos: any) {
+    if (pos.x >= this.x && pos.x <= this.x + this.width) {
+      if (pos.y >= this.y && pos.y <= this.y + this.height) {
+        let __sel = Math.floor((pos.y - this.y - WINDOW.WINDOW_MARGIN_Y) / (FONT.FONT_TITLE_LINE_HEIGHT + WINDOW.WINDOW_COMMAND_MARGIN));
+        if (__sel >= this._commands.length) __sel = this._commands.length - 1;
+        if (__sel < 0) __sel = 0;
+        if (__sel != this.selected) {
+          this.selected = __sel;
+          this.update_command();
+        }
+      }
+    }
+  }
+
   public onInit(spriteManager: SpriteManager) {
     super.onInit(spriteManager);
+    this.container.on('mousemove', (e: PIXI.interaction.InteractionEvent) => {
+      this.check_pos(e.data.global);
+    });
+    this.container.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
+      this.check_pos(e.data.global);
+      let cb = this._commands[this.selected].cb;
+      if (cb) cb();
+    });
   }
 }

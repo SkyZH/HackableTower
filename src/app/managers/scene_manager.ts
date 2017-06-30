@@ -3,10 +3,11 @@ import { renderer, stage } from '../app';
 import { Scene } from '../models';
 
 class _SceneManager {
-  private _scenes: Array<Scene>;
+  private _scenes: Array<{ new(): Scene }>;
+  private _current: Scene;
 
   constructor() {
-    this._scenes = new Array<Scene>();
+    this._scenes = new Array<{ new(): Scene }>();
   }
 
   private endScene(scene: Scene) {
@@ -19,37 +20,44 @@ class _SceneManager {
     scene.onStart();
   }
 
-  public push(scene: Scene) {
-    if (!_.isEmpty(this._scenes)) this.endScene(_.last(this._scenes));
+  public push(scene: { new(): Scene }) {
+    if (this._current) this.endScene(this._current);
     this._scenes.push(scene);
+    this._current = new scene;
     this.refresh();
-    this.startScene(scene);
+    this.startScene(this._current);
   }
 
   public pop() {
     if (_.isEmpty(this._scenes)) {
       throw new Error('scene stack already empty');
     } else {
-      this.endScene(_.last(this._scenes));
+      this.endScene(this._current);
     }
 
     this._scenes.pop();
-    this.refresh();
-    if (!_.isEmpty(this._scenes)) this.startScene(_.last(this._scenes));
+
+    if (!_.isEmpty(this._scenes)) {
+      this._current = new (_.last(this._scenes));
+      this.refresh();
+      this.startScene(this._current);
+    } else {
+      this.refresh();
+      this._current = null;
+    }
   }
 
-  public goto(scene: Scene) {
-    if (!_.isEmpty(this._scenes)) this.endScene(_.last(this._scenes));
+  public goto(scene: { new(): Scene }) {
+    if (this._current) this.endScene(this._current);
     this._scenes = [scene];
+    this._current = new scene;
     this.refresh();
-    this.startScene(scene);
+    this.startScene(this._current);
   }
 
   private refresh() {
     stage.removeChildren();
-    if (!_.isEmpty(this._scenes)) {
-      stage.addChild(_.last(this._scenes).stage)
-    }
+    if (this._current) stage.addChild(this._current.stage)
   }
 };
 
