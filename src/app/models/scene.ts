@@ -1,24 +1,28 @@
 import { Subject } from 'rxjs';
 import { resize$ as Resize$, SubscriptionManaged } from '../util';
 import { renderer } from '../app';
+import { SpriteManager } from '../managers';
 
 export class Scene extends SubscriptionManaged {
   public stage: PIXI.Container;
-  protected ticker: PIXI.ticker.Ticker;
-  protected resize$: Subject<any>;
+  public ticker: PIXI.ticker.Ticker;
+  public resize$: Subject<any>;
+  protected spriteManager: SpriteManager;
   private _graphics: PIXI.Graphics;
 
-  protected get viewport() : PIXI.Rectangle { return renderer.screen };
+  public get viewport() : PIXI.Rectangle { return renderer.screen };
   
   constructor() {
     super();
     this.stage = new PIXI.Container();
     this.resize$ = new Subject<any>();
     this._graphics = new PIXI.Graphics();
+    this.spriteManager = new SpriteManager(this);
   }
 
   onInit() {
     this.ticker = new PIXI.ticker.Ticker();
+    this.spriteManager.onInit();
     this.stage.addChild(this._graphics);
   }
 
@@ -44,5 +48,7 @@ export class Scene extends SubscriptionManaged {
 
   onDestroy() {
     this.ticker.destroy();
+    this.spriteManager.onDestroy();
+    this.stage.destroy(true);
   }
 }

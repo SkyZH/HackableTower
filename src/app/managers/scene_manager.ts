@@ -4,39 +4,45 @@ import { Scene } from '../models';
 
 class _SceneManager {
   private _scenes: Array<Scene>;
-  
+
   constructor() {
     this._scenes = new Array<Scene>();
   }
 
-  public push(scene: Scene) {
+  private endScene(scene: Scene) {
+    scene.onEnd();
+    scene.onDestroy();
+  }
+
+  private startScene(scene: Scene) {
     scene.onInit();
-    this._scenes.push(scene);
     scene.onStart();
+  }
+
+  public push(scene: Scene) {
+    if (!_.isEmpty(this._scenes)) this.endScene(_.last(this._scenes));
+    this._scenes.push(scene);
     this.refresh();
+    this.startScene(scene);
   }
 
   public pop() {
     if (_.isEmpty(this._scenes)) {
       throw new Error('scene stack already empty');
+    } else {
+      this.endScene(_.last(this._scenes));
     }
-    let _lstScene = _.last(this._scenes);
-    _lstScene.onEnd();
+
     this._scenes.pop();
-    _lstScene.onDestroy();
     this.refresh();
+    if (!_.isEmpty(this._scenes)) this.startScene(_.last(this._scenes));
   }
 
   public goto(scene: Scene) {
-    if (!_.isEmpty(this._scenes)) {
-      let _lstScene = _.last(this._scenes);
-      _lstScene.onEnd();
-      this._scenes.pop();
-      _lstScene.onDestroy();
-    }
-    scene.onInit();
+    if (!_.isEmpty(this._scenes)) this.endScene(_.last(this._scenes));
     this._scenes = [scene];
     this.refresh();
+    this.startScene(scene);
   }
 
   private refresh() {
