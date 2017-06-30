@@ -53,6 +53,7 @@ export class Window extends Sprite {
   }
 
   public update() {
+    super.update();
     this.update_bound();
   }
 

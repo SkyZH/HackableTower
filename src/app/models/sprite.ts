@@ -14,9 +14,14 @@ export class Sprite {
 
   public onInit(spriteManager: SpriteManager) {
     this.spriteManager = spriteManager;
+    this.update();
   }
 
   public onDestroy() {
     this.container.destroy(true);
+  }
+
+  public update() {
+    
   }
 }

@@ -4,17 +4,17 @@ import { COS } from '../../util/animation/cos';
 
 export class Window_Selectable extends Window {
   private graphics_select: PIXI.Graphics;
-  private _select: PIXI.Rectangle;
+  protected _select: PIXI.Rectangle;
 
   constructor(_bound: PIXI.Rectangle) {
     super(_bound);
     this.graphics_select = new PIXI.Graphics;
     this.container.addChild(this.graphics_select);
-    this.selectBound = new PIXI.Rectangle(0, 0, 0, 0);
+    this._select = new PIXI.Rectangle(0, 0, 0, 0);
   }
   
   private drawSelectableBound() {
-    this.graphics_select.lineStyle(2, 0xffffff, 1);
+    this.graphics_select.lineStyle(1, 0xffffff, 1);
     this.graphics_select.beginFill(0xffffff, 0.8);
     this.graphics_select.drawRoundedRect(
       this.x + this.selectBound.x,
@@ -38,7 +38,7 @@ export class Window_Selectable extends Window {
 
   public set selectBound(_bound: PIXI.Rectangle) { 
     this._select = _bound;
-    this.update();
+    this.update_selectable();
   }
 
   public onInit(spriteManager: SpriteManager) {

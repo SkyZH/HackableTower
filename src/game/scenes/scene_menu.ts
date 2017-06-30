@@ -18,8 +18,11 @@ export class Scene_Menu extends Scene {
   }
 
   private get menuWindow() {
-    const window = new Window_Command();
-    window.commands = [<Command> { name: 'Start' }];
+    const window = new Window_Command([
+      <Command> { name: '新存档' },
+      <Command> { name: '加载游戏' },
+      <Command> { name: '关于' }
+    ]);
     this.resize$.subscribe(() => {
       window.width = 400;
       window.y = this.viewport.height - 100 - window.height;
