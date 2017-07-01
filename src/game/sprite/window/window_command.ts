@@ -1,4 +1,4 @@
-import { Sprite, SpriteManager } from '../../../app';
+import { Sprite, SpriteManager, AudioManager, RESOURCE_HELPER as RES } from '../../../app';
 import { Command } from '../../models';
 import { Window_Selectable } from './window_selectable';
 import { COS } from '../../util/animation/cos';
@@ -15,11 +15,11 @@ export class Window_Command extends Window_Selectable {
     this.commands_container = new PIXI.Container();
     this.container.addChild(this.commands_container);
     this._style = new PIXI.TextStyle({
-      fontFamily: 'Noto Serif CJK SC Medium',
+      fontFamily: FONT.FONT_FAMILY_TITLE,
       fill: '#ffffff',
       fontSize: FONT.FONT_SIZE_TITLE
     });
-    this.selected = 0;
+    this.selected = -1;
     this.container.interactive = true;
   }
 
@@ -86,6 +86,7 @@ export class Window_Command extends Window_Selectable {
     if (__sel != this.selected) {
       this.selected = __sel;
       this.update_command();
+      if (__sel != -1) AudioManager.playSE(RES.Sound('menu-navigation.mp3'));
     }
   }
 

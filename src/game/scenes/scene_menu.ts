@@ -1,7 +1,9 @@
 import { Scene, SceneManager, AudioManager, RESOURCE_HELPER as RES, requestExitFullscreen } from '../../app';
+import { Scene_Game } from './scene_game';
 import { Window_Command } from '../sprite';
 import { Command } from '../models';
 import { COS } from '../util/animation/cos';
+import { FONT } from '../const';
 
 
 export class Scene_Menu extends Scene {
@@ -29,12 +31,14 @@ export class Scene_Menu extends Scene {
 
   private get menuWindow() {
     const menuWindow = new Window_Command([
-      <Command> { name: '新存档' },
+      <Command> { name: '新存档', cb: () => SceneManager.push(Scene_Game) },
       <Command> { name: '加载游戏' },
       <Command> { name: '关于', cb: () => { window.open("https://github.com/SkyZH/HackableTower") } },
+      <Command> { name: '设置' },
       <Command> { name: '退出', cb: () => {
         requestExitFullscreen();
         SceneManager.pop();
+        window.close();
       }}
     ]);
     this.resize$.subscribe(() => {
@@ -48,8 +52,11 @@ export class Scene_Menu extends Scene {
 
   private get titleText() {
     const style = new PIXI.TextStyle({
-      fontFamily: 'Noto Serif',
-      fill: '#ffffff'
+      fontFamily: FONT.FONT_FAMILY_TITLE,
+      fill: '#ffffff',
+      fontSize: FONT.FONT_SIZE_DISPLAY_3,
+      stroke: '#000000',
+      strokeThickness: 1
     });
 
     const richText = new PIXI.Text('Magic Tower !Hackable', style);
@@ -73,11 +80,11 @@ export class Scene_Menu extends Scene {
 
   onStart() {
     super.onStart();
-    AudioManager.play(RES.Sound('POL-evolve-short.wav'));
+    AudioManager.playBGM(RES.Sound('POL-evolve-short.wav'));
   }
 
   onEnd() {
     super.onEnd();
-    AudioManager.stop();
+    AudioManager.stopBGM();
   }
 }
