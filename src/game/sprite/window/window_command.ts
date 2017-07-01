@@ -51,12 +51,16 @@ export class Window_Command extends Window_Selectable {
   }
 
   private update_command() {
-    this.selectBound = new PIXI.Rectangle(
-      WINDOW.WINDOW_MARGIN_X,
-      this.selected * (FONT.FONT_TITLE_LINE_HEIGHT + WINDOW.WINDOW_COMMAND_MARGIN) + WINDOW.WINDOW_MARGIN_Y,
-      this.width - 2 * WINDOW.WINDOW_MARGIN_X,
-      FONT.FONT_TITLE_LINE_HEIGHT
-    );
+    if (this.selected != -1) {
+      this.selectBound = new PIXI.Rectangle(
+        WINDOW.WINDOW_MARGIN_X,
+        this.selected * (FONT.FONT_TITLE_LINE_HEIGHT + WINDOW.WINDOW_COMMAND_MARGIN) + WINDOW.WINDOW_MARGIN_Y,
+        this.width - 2 * WINDOW.WINDOW_MARGIN_X,
+        FONT.FONT_TITLE_LINE_HEIGHT
+      );
+    } else {
+      this.selectBound = null;
+    }
   }
 
   public update() {
@@ -65,17 +69,23 @@ export class Window_Command extends Window_Selectable {
     this.update_text();
   }
 
-  private check_pos(pos: any) {
+  private _check_pos(pos: any): number {
+    let __sel: number = -1;
     if (pos.x >= this.x && pos.x <= this.x + this.width) {
       if (pos.y >= this.y && pos.y <= this.y + this.height) {
-        let __sel = Math.floor((pos.y - this.y - WINDOW.WINDOW_MARGIN_Y) / (FONT.FONT_TITLE_LINE_HEIGHT + WINDOW.WINDOW_COMMAND_MARGIN));
+        __sel = Math.floor((pos.y - this.y - WINDOW.WINDOW_MARGIN_Y) / (FONT.FONT_TITLE_LINE_HEIGHT + WINDOW.WINDOW_COMMAND_MARGIN));
         if (__sel >= this._commands.length) __sel = this._commands.length - 1;
         if (__sel < 0) __sel = 0;
-        if (__sel != this.selected) {
-          this.selected = __sel;
-          this.update_command();
-        }
       }
+    }
+    return __sel;
+  }
+
+  private check_pos(pos: any) {
+    let __sel: number = this._check_pos(pos);
+    if (__sel != this.selected) {
+      this.selected = __sel;
+      this.update_command();
     }
   }
 

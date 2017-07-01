@@ -1,6 +1,8 @@
 import { Scene, SceneManager, AudioManager, RESOURCE_HELPER as RES, requestExitFullscreen } from '../../app';
 import { Window_Command } from '../sprite';
 import { Command } from '../models';
+import { COS } from '../util/animation/cos';
+
 
 export class Scene_Menu extends Scene {
   constructor() {
@@ -9,31 +11,39 @@ export class Scene_Menu extends Scene {
 
   private get bgSprite() {
     let bg = PIXI.Sprite.fromImage(RES.Background('menu.jpg'));
-    bg.anchor.set(0, 0);
+    bg.anchor.set(0.5, 0.5);
     this.resize$.subscribe(() => {
       bg.width = this.viewport.width;
       bg.height = this.viewport.height;
+      bg.x = this.viewport.width / 2;
+      bg.y = this.viewport.height / 2;
     });
+
+    this.ticker.add(() => {
+      bg.width = this.viewport.width * COS(this.ticker.lastTime, 10000, 1, 1.2);
+      bg.height = this.viewport.height * COS(this.ticker.lastTime, 10000, 1, 1.2);
+    });
+
     return bg;
   }
 
   private get menuWindow() {
-    const window = new Window_Command([
+    const menuWindow = new Window_Command([
       <Command> { name: '新存档' },
       <Command> { name: '加载游戏' },
-      <Command> { name: '关于', cb: () => SceneManager.pop() },
+      <Command> { name: '关于', cb: () => { window.open("https://github.com/SkyZH/HackableTower") } },
       <Command> { name: '退出', cb: () => {
         requestExitFullscreen();
         SceneManager.pop();
       }}
     ]);
     this.resize$.subscribe(() => {
-      window.width = 300;
-      window.y = this.viewport.height - 100 - window.height;
-      window.x = (this.viewport.width - window.width) / 2;
+      menuWindow.width = 300;
+      menuWindow.y = this.viewport.height - 100 - menuWindow.height;
+      menuWindow.x = (this.viewport.width - menuWindow.width) / 2;
     });
     
-    return window;
+    return menuWindow;
   }
 
   private get titleText() {

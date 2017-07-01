@@ -26,7 +26,7 @@ export class Window_Selectable extends Window {
 
   private update_selectable() {
     this.graphics_select.clear();
-    this.drawSelectableBound();
+    if (this._select) this.drawSelectableBound();
   }
 
   public update() {
