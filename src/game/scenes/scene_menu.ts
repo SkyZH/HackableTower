@@ -1,4 +1,4 @@
-import { Scene, SceneManager, RESOURCE_HELPER as RES } from '../../app';
+import { Scene, SceneManager, AudioManager, RESOURCE_HELPER as RES, requestExitFullscreen } from '../../app';
 import { Window_Command } from '../sprite';
 import { Command } from '../models';
 
@@ -21,7 +21,11 @@ export class Scene_Menu extends Scene {
     const window = new Window_Command([
       <Command> { name: '新存档' },
       <Command> { name: '加载游戏' },
-      <Command> { name: '关于', cb: () => { SceneManager.pop(); }}
+      <Command> { name: '关于', cb: () => SceneManager.pop() },
+      <Command> { name: '退出', cb: () => {
+        requestExitFullscreen();
+        SceneManager.pop();
+      }}
     ]);
     this.resize$.subscribe(() => {
       window.width = 300;
@@ -32,14 +36,38 @@ export class Scene_Menu extends Scene {
     return window;
   }
 
+  private get titleText() {
+    const style = new PIXI.TextStyle({
+      fontFamily: 'Noto Serif',
+      fill: '#ffffff'
+    });
+
+    const richText = new PIXI.Text('Magic Tower !Hackable', style);
+    this.resize$.subscribe(() => {
+      richText.x = this.viewport.width / 2;
+      richText.y = this.viewport.height / 2;
+    });
+
+    richText.anchor.set(0.5);
+
+    return richText;
+  }
+
   onInit() {
     super.onInit();
 
     this.stage.addChild(this.bgSprite);
+    this.stage.addChild(this.titleText);
     this.spriteManager.add(this.menuWindow);
   }
 
   onStart() {
     super.onStart();
+    AudioManager.play(RES.Sound('POL-evolve-short.wav'));
+  }
+
+  onEnd() {
+    super.onEnd();
+    AudioManager.stop();
   }
 }

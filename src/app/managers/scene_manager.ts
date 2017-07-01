@@ -5,9 +5,11 @@ import { Scene } from '../models';
 class _SceneManager {
   private _scenes: Array<{ new(): Scene }>;
   private _current: Scene;
+  private ticker: PIXI.ticker.Ticker;
 
   constructor() {
     this._scenes = new Array<{ new(): Scene }>();
+    this.ticker = new PIXI.ticker.Ticker;
   }
 
   private endScene(scene: Scene) {

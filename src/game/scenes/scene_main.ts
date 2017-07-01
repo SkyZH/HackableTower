@@ -32,7 +32,7 @@ export class Scene_Main extends Scene {
       fontSize: 16
     });
 
-    const richText = new PIXI.Text('Press any key to continue', style);
+    const richText = new PIXI.Text('Click anywhere to continue', style);
     richText.anchor.set(0.5);
 
     this.resize$.subscribe(() => {
@@ -42,25 +42,6 @@ export class Scene_Main extends Scene {
 
     this.ticker.add(() => {
       richText.alpha = COS(this.ticker.lastTime, 2000);
-    });
-
-    return richText;
-  }
-
-  private get warningText() {
-    const style = new PIXI.TextStyle({
-      fontFamily: 'Noto Serif',
-      fill: '#ffffff',
-      fontSize: 16
-    });
-
-    const richText = new PIXI.Text("Processing...", style);
-    richText.anchor.set(0.5, 1);
-
-    this.resize$.subscribe(() => {
-      richText.x = this.viewport.width / 2;
-      richText.y = this.viewport.height - 30;
-      richText.text = `Resolution: ${this.viewport.width} x ${this.viewport.height}.`;
     });
 
     return richText;
@@ -80,7 +61,6 @@ export class Scene_Main extends Scene {
 
     this.stage.addChild(this.titleText);
     this.stage.addChild(this.readyText);
-    this.stage.addChild(this.warningText);
   }
 
   onStart() {
