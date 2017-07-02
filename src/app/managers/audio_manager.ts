@@ -1,11 +1,15 @@
 import { Howl } from 'howler';
+import { Injector, Injectable } from '../../di';
 import * as _ from 'lodash';
 
-class _AudioManager {
+export class AudioManager extends Injectable {
 
   private _sound : { [channel: string]: Array<Howl>; };
 
-  constructor() {
+  constructor(baseInjector: Injector) {
+    super(baseInjector);
+    this.injector.provide(AudioManager, this);
+    
     this._sound = {};
   }
 
@@ -50,5 +54,3 @@ class _AudioManager {
   }
 
 };
-
-export const AudioManager = new _AudioManager;

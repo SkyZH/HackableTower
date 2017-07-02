@@ -1,18 +1,27 @@
-import { Scene, SceneManager, AudioManager, RESOURCE_HELPER as RES, requestExitFullscreen } from '../../app';
+import { Injector, Injectable } from '../../di';
+import { Scene, SceneManager, AudioManager, ResourceManager, PlatformManager } from '../../app';
 import { Scene_Game } from './scene_game';
-import { Window_Command } from '../sprite';
+import { Window_Command, Window } from '../sprite';
 import { Command } from '../models';
 import { COS } from '../util/animation/cos';
 import { FONT } from '../const';
 
 
 export class Scene_Menu extends Scene {
-  constructor() {
-    super();
+  protected resourceManager: ResourceManager;
+  protected sceneManager: SceneManager;
+  protected audioManager: AudioManager;
+
+  constructor(baseInjector: Injector) {
+    super(baseInjector);
+
+    this.resourceManager = this.injector.resolve(ResourceManager);
+    this.sceneManager = this.injector.resolve(SceneManager);
+    this.audioManager = this.injector.resolve(AudioManager);
   }
 
   private get bgSprite() {
-    let bg = PIXI.Sprite.fromImage(RES.Background('menu.jpg'));
+    let bg = PIXI.Sprite.fromImage(this.resourceManager.Background('menu.jpg'));
     bg.anchor.set(0.5, 0.5);
     this.resize$.subscribe(() => {
       bg.width = this.viewport.width;
@@ -29,25 +38,26 @@ export class Scene_Menu extends Scene {
     return bg;
   }
 
-  private get menuWindow() {
-    const menuWindow = new Window_Command([
-      <Command> { name: '新存档', cb: () => SceneManager.push(Scene_Game) },
+  private addMenuWindow() {
+    const menuWindow = this.injector.create(Window_Command);
+    this.spriteManager.add(menuWindow);
+    menuWindow.commands = ([
+      <Command> { name: '新存档', cb: () => this.sceneManager.push(Scene_Game) },
       <Command> { name: '加载游戏' },
       <Command> { name: '关于', cb: () => { window.open("https://github.com/SkyZH/HackableTower") } },
       <Command> { name: '设置' },
       <Command> { name: '退出', cb: () => {
-        requestExitFullscreen();
-        SceneManager.pop();
+        this.platformManager.requestExitFullscreen();
+        this.sceneManager.pop();
         window.close();
       }}
     ]);
+    
     this.resize$.subscribe(() => {
       menuWindow.width = 300;
       menuWindow.y = this.viewport.height - 100 - menuWindow.height;
       menuWindow.x = (this.viewport.width - menuWindow.width) / 2;
     });
-    
-    return menuWindow;
   }
 
   private get titleText() {
@@ -75,16 +85,16 @@ export class Scene_Menu extends Scene {
 
     this.stage.addChild(this.bgSprite);
     this.stage.addChild(this.titleText);
-    this.spriteManager.add(this.menuWindow);
+    this.addMenuWindow();
   }
 
   onStart() {
     super.onStart();
-    AudioManager.playBGM(RES.Sound('POL-evolve-short.wav'));
+    this.audioManager.playBGM(this.resourceManager.Sound('POL-evolve-short.wav'));
   }
 
   onEnd() {
     super.onEnd();
-    AudioManager.stopBGM();
+    this.audioManager.stopBGM();
   }
 }

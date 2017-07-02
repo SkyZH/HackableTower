@@ -1,3 +1,1 @@
-import './scenes';
-
-import './game';
+export * from './game';

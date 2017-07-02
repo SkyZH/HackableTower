@@ -1,44 +1,54 @@
-import { Sprite, SpriteManager } from '../../../app';
+import { Sprite, SpriteManager, getPropertyDescriptor } from '../../../app';
+import { Injector } from '../../../di';
 
 export class Window extends Sprite {
   private graphics_bound: PIXI.Graphics;
+  private _bound: PIXI.Rectangle;
 
-  constructor(protected _bound: PIXI.Rectangle) {
-    super();
+  constructor(baseInjector: Injector) {
+    super(baseInjector);
+    this._bound = new PIXI.Rectangle;
     this.graphics_bound = new PIXI.Graphics;
-    this.container.addChild(this.graphics_bound);
   }
 
   public get bound(): PIXI.Rectangle { return new PIXI.Rectangle(this.x, this.y, this.width, this.height); }
   
   public setBound(_bound: PIXI.Rectangle) { 
     this._bound = _bound;
-    this.update();
+    this.update_bound();
   }
 
   public set x(x: number) {
     this._bound.x = x;
-    this.update();
+    this.update_bound();
   }
   public set y(y: number) {
     this._bound.y = y;
-    this.update();
+    this.update_bound();
   }
   
   public set width(width: number) {
     this._bound.width = width;
-    this.update();
+    this.update_bound();
   }
   
   public set height(height: number) {
     this._bound.height = height;
-    this.update();
+    this.update_bound();
   }
 
-  public get x() { return this._bound.x; }
-  public get y() { return this._bound.y; }
-  public get width() { return this._bound.width; }
-  public get height() { return this._bound.height; }
+  protected baseSet(property: string, data: number) {
+    getPropertyDescriptor(Object.getPrototypeOf(this.constructor.prototype), property).set.bind(this)(data);
+  }
+  
+  protected baseGet(property: string): number{
+    return getPropertyDescriptor(Object.getPrototypeOf(this.constructor.prototype), property).get.bind(this)();
+  }
+
+  public get x(): number { return this._bound.x; }
+  public get y(): number { return this._bound.y;}
+  public get width(): number { return this._bound.width; }
+  public get height(): number { return this._bound.height; }
 
   private drawWindowBound() {
     this.graphics_bound.lineStyle(2, 0xffffff, 1);
@@ -51,14 +61,16 @@ export class Window extends Sprite {
     this.graphics_bound.clear();
     this.drawWindowBound();
   }
-
-  public update() {
-    super.update();
+  
+  public onInit() {
+    super.onInit();
+    this._container.addChild(this.graphics_bound);
     this.update_bound();
   }
 
-  public onInit(spriteManager: SpriteManager) {
-    super.onInit(spriteManager);
-    this.update();
+  public onDestroy() {
+    this._container.removeChild(this.graphics_bound);
+    this.graphics_bound.destroy(true);
+    super.onDestroy();
   }
 }

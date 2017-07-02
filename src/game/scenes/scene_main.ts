@@ -1,12 +1,17 @@
 import { Observable } from 'rxjs';
-import { Scene, SceneManager, requestFullscreen } from '../../app';
+import { Injector, Injectable } from '../../di';
+import { Scene, SceneManager, PlatformManager } from '../../app';
 import { Scene_Menu } from './scene_menu';
 import { COS } from '../util/animation/cos';
 import { FONT } from '../const';
 
 export class Scene_Main extends Scene {
-  constructor() {
-    super();
+  protected sceneManager: SceneManager;
+  
+  constructor(baseInjector: Injector) {
+    super(baseInjector);
+
+    this.sceneManager = this.injector.resolve(SceneManager);
   }
 
   private get titleText() {
@@ -67,15 +72,6 @@ export class Scene_Main extends Scene {
     return richText;
   }
 
-  private bindEvents() {
-    this.stage.interactive = true;
-    this.stage.buttonMode = true;
-    this.stage.on('pointerdown', () => {
-      SceneManager.push(Scene_Menu);
-      requestFullscreen();
-    });
-  }
-
   onInit() {
     super.onInit();
 
@@ -88,4 +84,20 @@ export class Scene_Main extends Scene {
     super.onStart();
     this.bindEvents();
   }
+
+  onEnd() {
+    super.onEnd();
+    this.stage.interactive = false;
+    this.stage.buttonMode = false;
+  }
+
+  private bindEvents() {
+    this.stage.interactive = true;
+    this.stage.buttonMode = true;
+    this.stage.on('pointerdown', () => {
+      this.sceneManager.push(Scene_Menu);
+      this.platformManager.requestFullscreen();
+    });
+  }
+
 }

@@ -1,7 +1,5 @@
-import './app';
-import './util';
-
-import './loop';
+export * from './app';
 export * from './managers';
 export * from './models';
-export { RESOURCE_HELPER, requestFullscreen, requestExitFullscreen } from './util';
+export * from './platform';
+export * from './util';

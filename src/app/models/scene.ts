@@ -1,34 +1,43 @@
 import { Subject } from 'rxjs';
-import { resize$ as Resize$, SubscriptionManaged } from '../util';
-import { renderer } from '../app';
-import { SpriteManager } from '../managers';
+import { SubscriptionManaged } from '../util';
+import { SpriteManager, SceneManager, PlatformManager } from '../managers';
+import { App } from '../app';
+import { Injector, Injectable } from '../../di';
 
 export class Scene extends SubscriptionManaged {
+  protected app: App;
+  protected platformManager: PlatformManager;
+  protected spriteManager: SpriteManager;
+
   public stage: PIXI.Container;
   public ticker: PIXI.ticker.Ticker;
   public resize$: Subject<any>;
-  protected spriteManager: SpriteManager;
   private _graphics: PIXI.Graphics;
 
-  public get viewport() : PIXI.Rectangle { return renderer.screen };
+  public get viewport() : PIXI.Rectangle { return this.app.renderer.screen };
   
-  constructor() {
-    super();
+  constructor(baseInjector: Injector) {
+    super(baseInjector);
+    this.injector.provide(Scene, this);
+
+    this.app = this.injector.resolve(App);
+    this.platformManager = this.injector.resolve(PlatformManager);
+    this.spriteManager = this.injector.selfProvide(SpriteManager);
+
     this.stage = new PIXI.Container();
     this.resize$ = new Subject<any>();
     this._graphics = new PIXI.Graphics();
-    this.spriteManager = new SpriteManager(this);
   }
 
   onInit() {
     this.ticker = new PIXI.ticker.Ticker();
-    this.spriteManager.onInit();
     this.stage.addChild(this._graphics);
+    this.spriteManager.onInit();
   }
 
   onStart() {
     this.ticker.start();
-    this.sub(Resize$.subscribe(d => {
+    this.sub(this.platformManager.resize$.subscribe(d => {
       this.resize$.next();
     }));
     this.resize$.subscribe(() => {
@@ -49,6 +58,7 @@ export class Scene extends SubscriptionManaged {
   onDestroy() {
     this.ticker.destroy();
     this.spriteManager.onDestroy();
+    this._graphics.destroy(true);
     this.stage.destroy(true);
   }
 }

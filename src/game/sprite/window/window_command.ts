@@ -1,4 +1,5 @@
-import { Sprite, SpriteManager, AudioManager, RESOURCE_HELPER as RES } from '../../../app';
+import { Sprite, SpriteManager, AudioManager, ResourceManager } from '../../../app';
+import { Injector } from '../../../di';
 import { Command } from '../../models';
 import { Window_Selectable } from './window_selectable';
 import { COS } from '../../util/animation/cos';
@@ -6,26 +7,37 @@ import { FONT, WINDOW } from '../../const';
 import * as _ from 'lodash';
 
 export class Window_Command extends Window_Selectable {
+  protected resourceManager: ResourceManager;
+  protected audioManager: AudioManager;
+
   private commands_container: PIXI.Container;
   private _style: PIXI.TextStyle;
   private selected: number;
+  protected _commands: Array<Command>;
 
-  constructor(protected _commands: Array<Command>) {
-    super(new PIXI.Rectangle(0, 0, 0, 0));
+  constructor(baseInjector: Injector) {
+    super(baseInjector);
+
+    this.audioManager = this.injector.resolve(AudioManager);
+    this.resourceManager = this.injector.resolve(ResourceManager);
+
+    this._commands = [];
     this.commands_container = new PIXI.Container();
-    this.container.addChild(this.commands_container);
+
     this._style = new PIXI.TextStyle({
       fontFamily: FONT.FONT_FAMILY_TITLE,
       fill: '#ffffff',
       fontSize: FONT.FONT_SIZE_TITLE
     });
     this.selected = -1;
-    this.container.interactive = true;
   }
 
   public set commands(commands: Array<Command>) {
     this._commands = commands;
-    this.update();
+    this.baseSet('height', this.height);
+    this.update_text();
+    this.selected = -1;
+    this.update_selection();
   }
 
   public get commands(): Array<Command> {
@@ -50,23 +62,17 @@ export class Window_Command extends Window_Selectable {
     });
   }
 
-  private update_command() {
+  private update_selection() {
     if (this.selected != -1) {
-      this.selectBound = new PIXI.Rectangle(
+      this.setSelectBound(new PIXI.Rectangle(
         WINDOW.WINDOW_MARGIN_X,
         this.selected * (FONT.FONT_TITLE_LINE_HEIGHT + WINDOW.WINDOW_COMMAND_MARGIN) + WINDOW.WINDOW_MARGIN_Y,
         this.width - 2 * WINDOW.WINDOW_MARGIN_X,
         FONT.FONT_TITLE_LINE_HEIGHT
-      );
+      ));
     } else {
-      this.selectBound = null;
+      this.setSelectBound(null);
     }
-  }
-
-  public update() {
-    this.update_command();
-    super.update();
-    this.update_text();
   }
 
   private _check_pos(pos: any): number {
@@ -85,20 +91,63 @@ export class Window_Command extends Window_Selectable {
     let __sel: number = this._check_pos(pos);
     if (__sel != this.selected) {
       this.selected = __sel;
-      this.update_command();
-      if (__sel != -1) AudioManager.playSE(RES.Sound('menu-navigation.mp3'));
+      this.update_selection();
+      if (__sel != -1) this.audioManager.playSE(this.resourceManager.Sound('menu-navigation.mp3'));
     }
   }
 
-  public onInit(spriteManager: SpriteManager) {
-    super.onInit(spriteManager);
-    this.container.on('mousemove', (e: PIXI.interaction.InteractionEvent) => {
+  public onInit() {
+    super.onInit();
+
+    this._container.interactive = true;
+    
+    this._container.addChild(this.commands_container);
+
+    this._container.on('mousemove', (e: PIXI.interaction.InteractionEvent) => {
       this.check_pos(e.data.global);
     });
-    this.container.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
+    this._container.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
       this.check_pos(e.data.global);
       let cb = this._commands[this.selected].cb;
       if (cb) cb();
     });
+    this.update_text();
+    this.update_selection();
   }
+
+  public onDestroy() {
+    this._container.interactive = false;
+    this._container.removeChild(this.commands_container);
+    this.commands_container.destroy(true);
+    super.onDestroy();
+  }
+
+  public setBound(_bound: PIXI.Rectangle) { 
+    super.setBound(_bound);
+    this.update_text();
+    this.update_selection();
+  }
+
+  public set x(x: number) {
+    this.baseSet('x', x);
+    this.update_text();
+    this.update_selection();
+  }
+  public set y(y: number) {
+    this.baseSet('y', y);
+    this.update_text();
+    this.update_selection();
+  }
+  
+  public set width(width: number) {
+    this.baseSet('width', width);
+    this.update_text();
+    this.update_selection();
+  }
+  
+  public set height(height: number) { throw new Error('command window height not settable'); }
+
+  public get x(): number { return this.baseGet('x'); }
+  public get y(): number { return this.baseGet('y'); }
+  public get width(): number { return this.baseGet('width'); }
 }

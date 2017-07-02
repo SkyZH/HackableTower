@@ -1,10 +1,13 @@
 import { Subscription } from 'rxjs';
+import { Injector, Injectable } from '../../di';
 import * as _ from 'lodash';
 
-export class SubscriptionManaged {
+export class SubscriptionManaged extends Injectable {
   private subscriptions: Array<Subscription>;
   
-  constructor() {
+  constructor(baseInjector: Injector) {
+    super(baseInjector);
+    
     this.subscriptions = new Array<Subscription>();
   }
 

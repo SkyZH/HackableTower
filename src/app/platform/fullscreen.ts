@@ -19,4 +19,3 @@ export const requestExitFullscreen = () => {
 
   rfs.call(el);
 };
-

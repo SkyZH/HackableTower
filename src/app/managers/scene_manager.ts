@@ -1,13 +1,20 @@
 import * as _ from 'lodash';
-import { renderer, stage } from '../app';
 import { Scene } from '../models';
+import { App } from '../app';
+import { Injector, Injectable } from '../../di';
 
-class _SceneManager {
-  private _scenes: Array<{ new(): Scene }>;
+export class SceneManager extends Injectable {
+  private app: App;
+
+  private _scenes: Array<{ new(...args : any[]): Scene }>;
   private _current: Scene;
   private ticker: PIXI.ticker.Ticker;
+  
+  constructor(baseInjector: Injector) {
+    super(baseInjector);
+    this.injector.provide(SceneManager, this);
+    this.app = this.injector.resolve(App);
 
-  constructor() {
     this._scenes = new Array<{ new(): Scene }>();
     this.ticker = new PIXI.ticker.Ticker;
     this.ticker.start();
@@ -34,10 +41,10 @@ class _SceneManager {
     if (cb) cb();
   }
   
-  public push(scene: { new(): Scene }) {
+  public push <T extends Scene> (scene: { new(...args : any[]): T }) {
     const tick = () => {
       this._scenes.push(scene);
-      this._current = new scene;
+      this._current = this.injector.create(scene);
       this.refresh();
       this.startScene(this._current);
     };
@@ -52,7 +59,7 @@ class _SceneManager {
         this._scenes.pop();
 
         if (!_.isEmpty(this._scenes)) {
-          this._current = new (_.last(this._scenes));
+          this._current = <Scene> this.injector.create(_.last(this._scenes));
           this.refresh();
           this.startScene(this._current);
         } else {
@@ -63,10 +70,10 @@ class _SceneManager {
     }
   }
 
-  public goto(scene: { new(): Scene }) {
+  public goto  <T extends Scene> (scene: { new(...args : any[]): T }) {
     const tick = () => {
       this._scenes = [scene];
-      this._current = new scene;
+      this._current = this.injector.create(scene);
       this.refresh();
       this.startScene(this._current);
     };
@@ -74,9 +81,7 @@ class _SceneManager {
   }
 
   private refresh() {
-    stage.removeChildren();
-    if (this._current) stage.addChild(this._current.stage)
+    this.app.stage.removeChildren();
+    if (this._current) this.app.stage.addChild(this._current.stage)
   }
 };
-
-export const SceneManager = new _SceneManager;

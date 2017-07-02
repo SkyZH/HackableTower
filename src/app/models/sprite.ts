@@ -1,27 +1,23 @@
 import { SpriteManager } from '../managers';
+import { Injector, Injectable } from '../../di';
 
-export class Sprite {
+export class Sprite extends Injectable {
   protected spriteManager: SpriteManager;
-  protected container: PIXI.Container;
+  protected _container: PIXI.Container;
 
-  public get _container() {
-    return this.container;
-  }
-
-  constructor() {
-    this.container = new PIXI.Container();
-  }
-
-  public onInit(spriteManager: SpriteManager) {
-    this.spriteManager = spriteManager;
-    this.update();
-  }
-
-  public onDestroy() {
-    this.container.destroy(true);
-  }
-
-  public update() {
+  get container() { return this._container; }
+  constructor(baseInjector: Injector) {
+    super(baseInjector);
+    this.injector.provide(Sprite, this);
+    this.spriteManager = this.injector.resolve(SpriteManager);
     
+    this._container = new PIXI.Container();
+  }
+
+  public onInit() {
+  }
+  
+  public onDestroy() {
+    this._container.destroy(true);
   }
 }
