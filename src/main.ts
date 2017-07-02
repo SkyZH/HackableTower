@@ -4,4 +4,4 @@ import { bootstrap } from './di';
 import { Main } from './game';
 
 let app = bootstrap(App);
-app.game(Main);
+app.Game(Main);

@@ -1,12 +1,15 @@
 import { Injector, Injectable } from '../../di';
-import { Scene, SceneManager, AudioManager, ResourceManager, PlatformManager } from '../../app';
+import { Scene, SceneManager, AudioManager, ResourceManager, PlatformManager, PRELOAD_RESOURCE } from '../../app';
 import { Scene_Game } from './scene_game';
 import { Window_Command, Window } from '../sprite';
 import { Command } from '../models';
 import { COS } from '../util/animation/cos';
 import { FONT } from '../const';
 
-
+@PRELOAD_RESOURCE({
+  Sound: ['POL-evolve-short.wav'],
+  Background: ['menu.jpg']
+})
 export class Scene_Menu extends Scene {
   protected resourceManager: ResourceManager;
   protected sceneManager: SceneManager;
@@ -43,7 +46,7 @@ export class Scene_Menu extends Scene {
     this.spriteManager.add(menuWindow);
     menuWindow.commands = ([
       <Command> { name: '新存档', cb: () => this.sceneManager.push(Scene_Game) },
-      <Command> { name: '加载游戏' },
+      <Command> { name: '继续' },
       <Command> { name: '关于', cb: () => { window.open("https://github.com/SkyZH/HackableTower") } },
       <Command> { name: '设置' },
       <Command> { name: '退出', cb: () => {

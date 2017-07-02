@@ -24,7 +24,7 @@ export class App extends Injectable {
     this.injector.selfProvide(SceneManager);
   }
 
-  public game(Game: any) {
-    this.injector.create(Game);
+  public Game <T extends Injectable> (game: { new(...args : any[]): T }) {
+    this.injector.create(game);
   }
 }

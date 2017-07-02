@@ -42,7 +42,7 @@ export class AudioManager extends Injectable {
   }
 
   public playBGM(path: string) {
-    this.play(path, 'bgm', true, true, { src: [path], loop: true, volume: 0.5 });
+    this.play(path, 'bgm', true, true, { src: [path], loop: true, volume: 1 });
   }
 
   public stopBGM() {
