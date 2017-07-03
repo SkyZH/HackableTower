@@ -1,23 +1,44 @@
 import * as _ from 'lodash';
 import { Scene } from '../models';
 import { App } from '../app';
+import { ResourceManager } from './resource_manager';
 import { Injector, Injectable } from '../../di';
 
 export class SceneManager extends Injectable {
   private app: App;
-
+  private resourceManager: ResourceManager;
   private _scenes: Array<{ new(...args : any[]): Scene }>;
   private _current: Scene;
   private ticker: PIXI.ticker.Ticker;
-  
+
+  private _loadingText: PIXI.Text;
+
   constructor(baseInjector: Injector) {
     super(baseInjector);
     this.injector.provide(SceneManager, this);
     this.app = this.injector.resolve(App);
+    this.resourceManager = this.injector.resolve(ResourceManager);
 
     this._scenes = new Array<{ new(): Scene }>();
     this.ticker = new PIXI.ticker.Ticker;
     this.ticker.start();
+
+    this._loadingText = this.getLoadingText();
+  }
+
+  private getLoadingText() {
+    const style = new PIXI.TextStyle({
+      fontFamily: "Noto Serif CJK SC Medium, Noto Serif, Roboto, Helvetica Neue, Helvetica, Arial, PingFang SC, Hiragino Sans GB, Microsoft YaHei, WenQuanYi Micro Hei, sans-serif",
+      fill: '#cccccc',
+      fontSize: 16
+    });
+
+    const richText = new PIXI.Text('加载中...', style);
+
+    richText.x = 10;
+    richText.y = 10;
+
+    return richText;
   }
 
   private endScene(scene: Scene, cb?: { () }) {
@@ -36,9 +57,17 @@ export class SceneManager extends Injectable {
   }
 
   private startScene(scene: Scene, cb?: { () }) {
-    scene.onInit();
-    scene.onStart();
-    if (cb) cb();
+    this.app.stage.addChild(this._loadingText);
+    let total = this.resourceManager.queueSize;
+    let _sub = this.resourceManager.preload(d => {
+      this._loadingText.text = `加载中 (${d.progress}/${total})`;
+      if (d.complete) {
+        this.app.stage.removeChild(this._loadingText);
+        scene.onInit();
+        scene.onStart();
+        if (cb) cb();
+      }
+    });
   }
   
   public push <T extends Scene> (scene: { new(...args : any[]): T }) {
@@ -70,7 +99,7 @@ export class SceneManager extends Injectable {
     }
   }
 
-  public goto  <T extends Scene> (scene: { new(...args : any[]): T }) {
+  public goto <T extends Scene> (scene: { new(...args : any[]): T }) {
     const tick = () => {
       this._scenes = [scene];
       this._current = this.injector.create(scene);

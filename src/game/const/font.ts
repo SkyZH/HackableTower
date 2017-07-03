@@ -9,5 +9,5 @@ export const FONT_SIZE_DISPLAY_1 = 112;
 const LINE_MARGIN = 0.1;
 export const FONT_LINE_HEIGHT = FONT_SIZE_DEFAULT + LINE_MARGIN * FONT_SIZE_DEFAULT * 2;
 export const FONT_TITLE_LINE_HEIGHT = FONT_SIZE_TITLE + LINE_MARGIN * FONT_SIZE_DEFAULT * 2;
-export const FONT_FAMILY_TITLE = "Noto Serif CJK SC Medium, Noto Serif, Arial, SimSun";
-export const FONT_FAMILY_BODY = "Noto Serif CJK SC Regular, Noto Serif, Arial, SimSun";
+export const FONT_FAMILY_TITLE = "Noto Serif CJK SC Medium, Noto Serif, Roboto, Helvetica Neue, Helvetica, Arial, PingFang SC, Hiragino Sans GB, Microsoft YaHei, WenQuanYi Micro Hei, sans-serif";
+export const FONT_FAMILY_BODY = "Noto Serif CJK SC Medium, Noto Serif, Roboto, Helvetica Neue, Helvetica, Arial, PingFang SC, Hiragino Sans GB, Microsoft YaHei, WenQuanYi Micro Hei, sans-serif";

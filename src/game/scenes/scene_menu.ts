@@ -1,14 +1,15 @@
 import { Injector, Injectable } from '../../di';
-import { Scene, SceneManager, AudioManager, ResourceManager, PlatformManager, PRELOAD_RESOURCE } from '../../app';
+import { Scene, SceneManager, AudioManager, ResourceManager, PlatformManager, PRELOAD_RESOURCE, PRELOAD_DEPENDENCY } from '../../app';
 import { Scene_Game } from './scene_game';
 import { Window_Command, Window } from '../sprite';
 import { Command } from '../models';
 import { COS } from '../util/animation/cos';
 import { FONT } from '../const';
 
+@PRELOAD_DEPENDENCY([Window_Command])
 @PRELOAD_RESOURCE({
-  Sound: ['POL-evolve-short.wav'],
-  Background: ['menu.jpg']
+  sound: ['POL-evolve-short.wav'],
+  background: ['menu.jpg']
 })
 export class Scene_Menu extends Scene {
   protected resourceManager: ResourceManager;
@@ -24,7 +25,7 @@ export class Scene_Menu extends Scene {
   }
 
   private get bgSprite() {
-    let bg = PIXI.Sprite.fromImage(this.resourceManager.Background('menu.jpg'));
+    let bg = new PIXI.Sprite(this.resourceManager.Background('menu.jpg').texture);
     bg.anchor.set(0.5, 0.5);
     this.resize$.subscribe(() => {
       bg.width = this.viewport.width;

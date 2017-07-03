@@ -10,15 +10,27 @@ CC BY 4.0 (for all game resources)
 
 ### Sounds
 
-#### [playONloop](http://playonloop.com)
+#### [playONloop](http://playonloop.com) (CC BY 4.0)
 
-[Evolve](https://www.playonloop.com/2017-music-loops/evolve/) (CC BY 4.0)
+[Evolve](https://www.playonloop.com/2017-music-loops/evolve/) 
+[Winter Lights](https://www.playonloop.com/2016-music-loops/winter-lights/)
+[Trick or Treat](https://www.playonloop.com/2016-music-loops/trick-or-treat/)
+[Blooming](https://www.playonloop.com/2016-music-loops/blooming/)
+[Perfect Engineering](https://www.playonloop.com/2017-music-loops/perfect-engineering/)
 
 #### [FreeSFX](http://www.freesfx.co.uk)
 
-```
-Keyboard Tap
-```
+* Keyboard Tap
+
+#### [NoiseForFun](http://www.noiseforfun.com/)
+
+* [Menu A](http://www.noiseforfun.com/2012-sound-effects/menu-a/)
+* [Cool Succsss](http://www.noiseforfun.com/2012-sound-effects/cool-success/)
+* [Carillon B](http://www.noiseforfun.com/2012-sound-effects/carillon-b/)
+* [Robo Hit](http://www.noiseforfun.com/2012-sound-effects/robo-hit/)
+* [Dusty Hit](http://www.noiseforfun.com/2012-sound-effects/dusty-hit/)
+* [Power Up](http://www.noiseforfun.com/2012-sound-effects/power-up/)
+* [Mutate 02](http://www.noiseforfun.com/2012-sound-effects/mutate-02/)
 
 ### Images
 

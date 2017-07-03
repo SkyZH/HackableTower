@@ -1,7 +1,13 @@
 import './styles/app.scss';
 import { App } from './app';
 import { bootstrap } from './di';
-import { Main } from './game';
+import { Main, Main_Dev } from './game';
 
 let app = bootstrap(App);
-app.Game(Main);
+
+if (process.env.ENV === 'build') {
+  app.Game(Main);
+} else {
+  app.Game(Main);
+  Error['stackTraceLimit'] = Infinity;
+}

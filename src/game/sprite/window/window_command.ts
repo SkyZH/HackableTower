@@ -7,7 +7,7 @@ import { FONT, WINDOW } from '../../const';
 import * as _ from 'lodash';
 
 @PRELOAD_RESOURCE({
-  Sound: ['menu-navigation.mp3']
+  sound: ['menu-navigation.mp3']
 })
 export class Window_Command extends Window_Selectable {
   protected resourceManager: ResourceManager;

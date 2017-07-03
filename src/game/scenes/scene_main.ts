@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import { Injector, Injectable } from '../../di';
-import { Scene, SceneManager, PlatformManager } from '../../app';
+import { Scene, SceneManager, PlatformManager, PRELOAD_RESOURCE } from '../../app';
 import { Scene_Menu } from './scene_menu';
 import { COS } from '../util/animation/cos';
 import { FONT } from '../const';
