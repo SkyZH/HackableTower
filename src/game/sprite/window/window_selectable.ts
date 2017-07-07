@@ -76,7 +76,7 @@ export class Window_Selectable extends Window {
 
   public onDestroy() {
     this._container.removeChild(this.graphics_select);
-    this.graphics_select.destroy(true);
+    this.graphics_select.destroy();
     super.onDestroy();
   }
 }

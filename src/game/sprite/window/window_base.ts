@@ -70,7 +70,7 @@ export class Window extends Sprite {
 
   public onDestroy() {
     this._container.removeChild(this.graphics_bound);
-    this.graphics_bound.destroy(true);
+    this.graphics_bound.destroy();
     super.onDestroy();
   }
 }

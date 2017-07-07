@@ -121,7 +121,7 @@ export class Window_Command extends Window_Selectable {
   public onDestroy() {
     this._container.interactive = false;
     this._container.removeChild(this.commands_container);
-    this.commands_container.destroy(true);
+    this.commands_container.destroy();
     super.onDestroy();
   }
 

@@ -18,6 +18,6 @@ export class Sprite extends Injectable {
   }
   
   public onDestroy() {
-    this._container.destroy(true);
+    this._container.destroy();
   }
 }

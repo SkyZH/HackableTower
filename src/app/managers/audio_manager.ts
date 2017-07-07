@@ -19,38 +19,38 @@ export class AudioManager extends Injectable {
     }
   }
 
-  public play(path: string, channel: string, overwrite?: boolean, fade?: boolean, options?: IHowlProperties) {
+  public play(sound: Howl, channel: string, overwrite?: boolean, fade?: boolean, volume?: number, loop?: boolean) {
     this._ensureChannel(channel);
     if (overwrite) {
       this.stop(channel, fade);
     }
-    let _sound = new Howl(options);
-    _sound.play();
-    if (fade) _sound.fade(0, 1, 1000); 
-    this._sound[channel].push(_sound);
+    sound.volume(volume === null ? 1 : volume);
+    sound.loop(loop === null ? false : loop);
+    sound.play();
+    if (fade) sound.fade(0, 1, 1000); 
+    this._sound[channel].push(sound);
   }
 
   public stop(channel: string, fade?: boolean) {
     this._ensureChannel(channel);
     _.forEach(this._sound[channel], (sound: Howl) => {
       if (fade) {
-        sound.once('fade', () => sound.unload());
+        sound.once('fade', () => sound.stop());
         sound.fade(1, 0, 1000);
-      } else sound.unload();
+      } else sound.stop();
     });
     this._sound[channel] = [];
   }
 
-  public playBGM(path: string) {
-    this.play(path, 'bgm', true, true, { src: [path], loop: true, volume: 1 });
+  public playBGM(sound: Howl) {
+    this.play(sound, 'bgm', true, true, 1, true);
   }
 
   public stopBGM() {
     this.stop('bgm', true);
   }
 
-  public playSE(path: string) {
-    this.play(path, 'se', false, false, { src: [path], loop: false, volume: 1 });
+  public playSE(sound: Howl) {
+    this.play(sound, 'se', false, false, 1, false);
   }
-
 };

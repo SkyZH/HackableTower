@@ -26,6 +26,7 @@ export class Scene_Menu extends Scene {
 
   private get bgSprite() {
     let bg = new PIXI.Sprite(this.resourceManager.Background('menu.jpg').texture);
+
     bg.anchor.set(0.5, 0.5);
     this.resize$.subscribe(() => {
       bg.width = this.viewport.width;
@@ -100,5 +101,9 @@ export class Scene_Menu extends Scene {
   onEnd() {
     super.onEnd();
     this.audioManager.stopBGM();
+  }
+
+  onDestroy() {
+    super.onDestroy();
   }
 }
