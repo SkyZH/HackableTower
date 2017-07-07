@@ -6,11 +6,10 @@ export class Sprite extends Injectable {
   protected _container: PIXI.Container;
 
   get container() { return this._container; }
+
   constructor(baseInjector: Injector) {
     super(baseInjector);
-    this.injector.provide(Sprite, this);
     this.spriteManager = this.injector.resolve(SpriteManager);
-    
     this._container = new PIXI.Container();
   }
 

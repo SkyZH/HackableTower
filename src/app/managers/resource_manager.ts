@@ -31,6 +31,7 @@ export class ResourceManager extends Injectable {
   public Background(name: string): PIXI.loaders.Resource { return this.getPreloaded('background', name); }
   public Sound(name: string): Howl { return this.getPreloaded('sound', name); }
   public Character(name: string): PIXI.loaders.Resource { return this.getPreloaded('character', name); }
+  public Tileset(name: string): PIXI.loaders.Resource { return this.getPreloaded('tileset', name); }
 
   public preparePreload(resources: any) {
     _.forOwn(resources, (paths, type) => {

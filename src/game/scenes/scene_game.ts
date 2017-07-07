@@ -1,14 +1,18 @@
-import { Scene, SceneManager, ResourceManager, AudioManager, PRELOAD_RESOURCE } from '../../app';
+import { Scene, SceneManager, ResourceManager, AudioManager, PRELOAD_RESOURCE, PRELOAD_DEPENDENCY } from '../../app';
 import { Injector, Injectable } from '../../di';
+import { Tileset_Map, Character_Actor, CHARACTER_DIRECTION, CHARACTER_STATUS } from '../sprite';
 
 @PRELOAD_RESOURCE({
-  sound: ['POL-blooming-short.wav'],
-  character: ['Braver-08.png']
+  sound: ['POL-blooming-short.wav']
 })
+@PRELOAD_DEPENDENCY([Tileset_Map, Character_Actor])
 export class Scene_Game extends Scene {
   protected resourceManager: ResourceManager;
   protected sceneManager: SceneManager;
   protected audioManager: AudioManager;
+
+  private _mapTileset: Tileset_Map;
+  private _actor: Character_Actor;
 
   constructor(baseInjector: Injector) {
     super(baseInjector);
@@ -21,7 +25,9 @@ export class Scene_Game extends Scene {
   public onInit() {
     super.onInit();
     this.audioManager.playBGM(this.resourceManager.Sound('POL-blooming-short.wav'));
-    this.stage.addChild(this.texture);
+    this.stage.addChild(this.sprite);
+    this.addActor();
+    this.bindEvents();
   }
 
   private bound(x: number, y: number, x_split: number, y_split: number, w: number, h: number) {
@@ -32,28 +38,35 @@ export class Scene_Game extends Scene {
       h / y_split
     );
   }
-  public get texture() {
-    let baseTexture = this.resourceManager.Character('Braver-08.png').texture;
-    let textureArray = [];
-    for (let j = 0; j < 4; j++) {
-      for (let i = 0; i < 4; i++) {
-        textureArray.push(new PIXI.Texture(
-          baseTexture.baseTexture,
-          this.bound(i, j, 4, 4, baseTexture.width, baseTexture.height)
-        ));
-      }
-    }
 
-    let sprite = new PIXI.extras.AnimatedSprite(textureArray);
+  public get sprite() {
+    this._mapTileset = this.injector.create(Tileset_Map);
+    this.spriteManager.add(this._mapTileset);
+    let sprite = new PIXI.Sprite(this._mapTileset.getTile(0, 0));
     sprite.anchor.x = sprite.anchor.y = 0;
-    sprite.x = 20;
-    sprite.y = 20;
-    sprite.play();
-    sprite.animationSpeed = 0.05;
+    sprite.x = 50;
+    sprite.y = 50;
     return sprite;
   }
+
+  public bindEvents() {
+    this.stage.interactive = true;
+    this.stage.on('pointerdown', () => {
+      this._actor.status = (this._actor.status + 1) % 3;
+      this._actor.direction = (this._actor.direction + 1) % 4;
+    });
+  }
+
+  public addActor() {
+    this._actor = this.injector.create(Character_Actor);
+    this.spriteManager.add(this._actor);
+    this._actor.direction = CHARACTER_DIRECTION.LEFT;
+    this._actor.status = CHARACTER_STATUS.WALKING;
+  }
+
   public onEnd() {
     super.onEnd();
     this.audioManager.stopBGM();
+    this.stage.interactive = false;
   }
 }

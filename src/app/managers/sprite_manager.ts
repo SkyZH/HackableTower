@@ -18,13 +18,13 @@ export class SpriteManager extends Injectable {
 
   public add(sprite: Sprite) {
     this.sprites.push(sprite);
-    this.scene.stage.addChild(sprite.container);
+    if (sprite.container) this.scene.stage.addChild(sprite.container);
     sprite.onInit();
   }
 
   public remove(sprite: Sprite) {
     _.remove(this.sprites, sprite);
-    this.scene.stage.removeChild(sprite.container);
+    if (sprite.container) this.scene.stage.removeChild(sprite.container);
     sprite.onDestroy();
   }
 
@@ -33,7 +33,7 @@ export class SpriteManager extends Injectable {
 
   public onDestroy() {
     _.forEach(this.sprites, (sprite: Sprite) => {
-      this.scene.stage.removeChild(sprite.container);
+      if (sprite.container) this.scene.stage.removeChild(sprite.container);
       sprite.onDestroy();
     });
   }
