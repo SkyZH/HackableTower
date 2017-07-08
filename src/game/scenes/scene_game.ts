@@ -2,11 +2,12 @@ import { Scene, SceneManager, ResourceManager, AudioManager, PRELOAD_RESOURCE, P
 import { Injector, Injectable } from '../../di';
 import { Map, Character_Actor, CHARACTER_DIRECTION, CHARACTER_STATUS } from '../sprite';
 import { MAP_DATA } from '../../data';
+import { MAP_RESOURCE } from '../resources';
 
 @PRELOAD_RESOURCE({
   sound: ['POL-blooming-short.wav']
 })
-@PRELOAD_DEPENDENCY([Map, Character_Actor])
+@PRELOAD_DEPENDENCY([Map, Character_Actor, MAP_RESOURCE])
 export class Scene_Game extends Scene {
   protected resourceManager: ResourceManager;
   protected sceneManager: SceneManager;
@@ -41,9 +42,8 @@ export class Scene_Game extends Scene {
   }
 
   public addMap() {
-    this._map = this.injector.create(Map);
+    this._map = this.injector.init(Map)(MAP_DATA[0]);
     this.spriteManager.add(this._map);
-    this._map.map = MAP_DATA[0];
   }
 
   public bindEvents() {

@@ -5,4 +5,5 @@ export interface MapData {
   row: number;
   col: number;
   events: any;
+  name?: string;
 };

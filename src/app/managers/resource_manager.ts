@@ -108,7 +108,7 @@ export const PRELOAD_RESOURCE = (data) => {
     Reflect.set(_c, 'hackabletower:resources', data);
     return _c;
   }
-}
+};
 
 export const PRELOAD_DEPENDENCY = (cls) => {
   return function classDecorator<T extends { new(...args:any[]): Injectable }>(constructor:T) {
@@ -124,4 +124,19 @@ export const PRELOAD_DEPENDENCY = (cls) => {
     _c.prototype = constructor.prototype;
     return _c;
   }
-}
+};
+
+export const PRELOAD_FN = (fn) => {
+  let __resources = fn();
+  return function classDecorator<T extends { new(...args:any[]): Injectable }>(constructor:T) {
+    let _c = class extends constructor {
+      constructor(...args) {
+        super(...args);
+        this.injector.resolve(ResourceManager).preparePreload(__resources);
+      }
+    }
+    _c.prototype = constructor.prototype;
+    Reflect.set(_c, 'hackabletower:resources', __resources);
+    return _c;
+  }
+};

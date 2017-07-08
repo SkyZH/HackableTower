@@ -3,26 +3,35 @@ import * as _ from 'lodash';
 import { Sprite } from '../../../app';
 import { Injector } from '../../../di';
 import { Tileset_Map } from '../tileset';
-import { MapData } from '../../../data';
-import { App } from '../../../app';
+import { MapData, MapEvent } from '../../../data';
+import { App, SpriteManager } from '../../../app';
+import { Charater_Event } from '../character';
 
 export class Map extends Tileset_Map {
 
   private _map: MapData;
   private _renderTexture: PIXI.RenderTexture;
   private _sprite: PIXI.Sprite;
+  private _events: Array<Charater_Event>;
+  private m_spriteManager: SpriteManager;
 
   protected app: App;
 
   constructor(baseInjector: Injector) {
     super(baseInjector);
     this.app = this.injector.resolve(App);
+    this._events = new Array<Charater_Event>();
+    this.m_spriteManager = this.injector.init(SpriteManager)(this._container);
+    this.injector.provide(SpriteManager, this.m_spriteManager);
   }
 
   public onInit() {
     super.onInit();
+    this.m_spriteManager.onInit();
     this._sprite = new PIXI.Sprite();
     this._container.addChild(this._sprite);
+    this.update_map();
+    this.update_events();
   }
 
   private update_map() {
@@ -47,9 +56,19 @@ export class Map extends Tileset_Map {
     __container.destroy();
   }
 
-  public set map(map: MapData) {
+  private update_events() {
+    _.forEach(this._map.events, (e: MapEvent) => {
+      let _character = this.injector.init(Charater_Event)(e.data.character);
+      this._events.push(_character);
+      this.m_spriteManager.add(_character);
+      _character.x = e.x * this.tileWidth;
+      _character.y = e.y * this.tileHeight;
+    });
+  }
+
+  public initialize(map: MapData) {
+    super.initialize();
     this._map = map;
-    this.update_map();
   }
 
   public get map(): MapData { return this._map; }
@@ -67,6 +86,7 @@ export class Map extends Tileset_Map {
     this._container.removeChild(this._sprite);
     this._sprite.destroy();
     this._renderTexture.destroy();
+    this.m_spriteManager.onDestroy();
     super.onDestroy();
   }
 }

@@ -1,4 +1,5 @@
 import { MapData } from './map_data';
+import { E, Door_Orange } from '../events';
 
 export default <MapData> {
   data: [
@@ -20,5 +21,8 @@ export default <MapData> {
   ],
   row: 15,
   col: 15,
-  events: []
+  events: [
+    E(Door_Orange, 7, 9)
+  ],
+  name: '底层'
 };

@@ -60,7 +60,7 @@ export abstract class Character extends Tileset {
       this._character.texture = this.getTileID(__frame);
     }
   };
-
+  
   public get x(): number { return this._character.x; }
   public get y(): number { return this._character.y;}
   public set x(x: number) { this._character.x = x;}

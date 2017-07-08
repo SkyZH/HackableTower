@@ -15,7 +15,17 @@ export class Injector {
   }
 
   public create <T extends Injectable> (cls: { new(...args : any[]): T }) : T {
-    return new cls(this);
+    let _cls = new cls(this);
+    _cls.initialize();
+    return _cls;
+  }
+
+  public init <T extends Injectable> (cls: { new(...args : any[]): T }) : (...args: any[]) => T {
+    let _cls = new cls(this);
+    return (...args) => {
+      _cls.initialize(...args);
+      return _cls;
+    };
   }
 
   public selfProvide <T extends Injectable> (cls: { new(...args : any[]): T }) : T {
@@ -25,11 +35,13 @@ export class Injector {
   }
 }
 
-export class Injectable {
+export abstract class Injectable {
   protected injector: Injector;
   constructor(baseInjector: Injector) {
     this.injector = new Injector(baseInjector);
   }
+
+  public initialize(...args: any[]) {};
 }
 
 export const bootstrap = (App: any) => {

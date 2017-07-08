@@ -2,8 +2,9 @@ import { Scene, SceneManager, ResourceManager, AudioManager, PRELOAD_RESOURCE, P
 import { Injector, Injectable } from '../../../di';
 import { Map, Character_Actor, CHARACTER_DIRECTION, CHARACTER_STATUS } from '../../sprite';
 import { MAP_DATA } from '../../../data';
+import { MAP_RESOURCE } from '../../resources';
 
-@PRELOAD_DEPENDENCY([Map])
+@PRELOAD_DEPENDENCY([Map, MAP_RESOURCE])
 export class Scene_Test_Map extends Scene {
   protected resourceManager: ResourceManager;
   protected sceneManager: SceneManager;
@@ -12,7 +13,7 @@ export class Scene_Test_Map extends Scene {
 
   constructor(baseInjector: Injector) {
     super(baseInjector);
-
+    
     this.resourceManager = this.injector.resolve(ResourceManager);
     this.sceneManager = this.injector.resolve(SceneManager);
   }
@@ -23,9 +24,9 @@ export class Scene_Test_Map extends Scene {
   }
 
   public addMap() {
-    this._map = this.injector.create(Map);
+    this._map = this.injector.init(Map)(MAP_DATA[0]);
+    console.log(this.spriteManager);
     this.spriteManager.add(this._map);
-    this._map.map = MAP_DATA[0];
   }
 
   public onEnd() {
