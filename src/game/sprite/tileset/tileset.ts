@@ -26,11 +26,11 @@ export abstract class Tileset extends Sprite {
   protected setRow(row: number) { this._row = row; }
   protected setCol(col: number) { this._col = col; }
 
-  public get row() { return this._row; }
-  public get col() { return this._col; }
-  public get width() { return this._tileset.width / this._col; }
-  public get height() { return this._tileset.height / this._row; }
-
+  public get tileRow() { return this._row; }
+  public get tileCol() { return this._col; }
+  public get tileWidth() { return this._tileset.width / this._col; }
+  public get tileHeight() { return this._tileset.height / this._row; }
+  
   private bound(x: number, y: number, x_split: number, y_split: number, w: number, h: number) {
     return new PIXI.Rectangle(
       (w / x_split) * x,
@@ -41,6 +41,7 @@ export abstract class Tileset extends Sprite {
   }
 
   private _getTile(row: number, col: number): PIXI.Texture {
+    console.log(row, col);
     return new PIXI.Texture(this._tileset.baseTexture, this.bound(col, row, this._col, this._row, this._tileset.width, this._tileset.height));
   }
   
@@ -57,14 +58,14 @@ export abstract class Tileset extends Sprite {
 
   public getTileID(id: number): PIXI.Texture {
     this._ensureID(id);
-    if (!this._textures[id]) this._textures[id] = this._getTile(Math.floor(id / this.col), id % this.col);
+    if (!this._textures[id]) this._textures[id] = this._getTile(Math.floor(id / this.tileCol), id % this.tileCol);
     return this._textures[id];
   }
 
   protected getAllTiles(): Array<PIXI.Texture> {
     let __textures = [];
-    for (let i = 0; i < this.row; i++) {
-      for (let j = 0; j < this.col; j++) {
+    for (let i = 0; i < this.tileRow; i++) {
+      for (let j = 0; j < this.tileCol; j++) {
         __textures.push(this.getTile(i, j));
       }
     }
@@ -75,5 +76,6 @@ export abstract class Tileset extends Sprite {
     _.forOwn(this._textures, (texture: PIXI.Texture) => {
       texture.destroy();
     });
+    super.onDestroy();
   }
 }

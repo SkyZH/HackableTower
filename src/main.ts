@@ -8,6 +8,6 @@ let app = bootstrap(App);
 if (process.env.ENV === 'build') {
   app.Game(Main);
 } else {
-  app.Game(Main);
+  app.Game(Main_Dev);
   Error['stackTraceLimit'] = Infinity;
 }

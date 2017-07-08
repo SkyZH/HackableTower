@@ -1,17 +1,18 @@
 import { Scene, SceneManager, ResourceManager, AudioManager, PRELOAD_RESOURCE, PRELOAD_DEPENDENCY } from '../../app';
 import { Injector, Injectable } from '../../di';
-import { Tileset_Map, Character_Actor, CHARACTER_DIRECTION, CHARACTER_STATUS } from '../sprite';
+import { Map, Character_Actor, CHARACTER_DIRECTION, CHARACTER_STATUS } from '../sprite';
+import { MAP_DATA } from '../../data';
 
 @PRELOAD_RESOURCE({
   sound: ['POL-blooming-short.wav']
 })
-@PRELOAD_DEPENDENCY([Tileset_Map, Character_Actor])
+@PRELOAD_DEPENDENCY([Map, Character_Actor])
 export class Scene_Game extends Scene {
   protected resourceManager: ResourceManager;
   protected sceneManager: SceneManager;
   protected audioManager: AudioManager;
 
-  private _mapTileset: Tileset_Map;
+  private _map: Map;
   private _actor: Character_Actor;
 
   constructor(baseInjector: Injector) {
@@ -25,7 +26,7 @@ export class Scene_Game extends Scene {
   public onInit() {
     super.onInit();
     this.audioManager.playBGM(this.resourceManager.Sound('POL-blooming-short.wav'));
-    this.stage.addChild(this.sprite);
+    this.addMap();
     this.addActor();
     this.bindEvents();
   }
@@ -39,14 +40,10 @@ export class Scene_Game extends Scene {
     );
   }
 
-  public get sprite() {
-    this._mapTileset = this.injector.create(Tileset_Map);
-    this.spriteManager.add(this._mapTileset);
-    let sprite = new PIXI.Sprite(this._mapTileset.getTile(0, 0));
-    sprite.anchor.x = sprite.anchor.y = 0;
-    sprite.x = 50;
-    sprite.y = 50;
-    return sprite;
+  public addMap() {
+    this._map = this.injector.create(Map);
+    this.spriteManager.add(this._map);
+    this._map.map = MAP_DATA[0];
   }
 
   public bindEvents() {
