@@ -41,7 +41,6 @@ export abstract class Tileset extends Sprite {
   }
 
   private _getTile(row: number, col: number): PIXI.Texture {
-    console.log(row, col);
     return new PIXI.Texture(this._tileset.baseTexture, this.bound(col, row, this._col, this._row, this._tileset.width, this._tileset.height));
   }
   
