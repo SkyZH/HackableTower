@@ -1,2 +1,4 @@
 export const CHARACTER_SPRITE_SPEED_WALK = 250;
 export const CHARACTER_SPRITE_SPEED_RUN = 100;
+export const CHARACTER_SPEED_WALK = 250;
+export const CHARACTER_SPEED_RUN = 100;

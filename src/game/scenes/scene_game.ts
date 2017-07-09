@@ -6,7 +6,7 @@ import { MAP_DATA } from '../../data';
 import { MAP_RESOURCE } from '../resources';
 
 @PRELOAD_RESOURCE({
-  sound: ['POL-blooming-short.wav']
+  sound: ['POL-blooming-short.wav', 'walking.wav']
 })
 @PRELOAD_DEPENDENCY([Map, Character_Actor, MAP_RESOURCE])
 export class Scene_Game extends Scene {
@@ -17,6 +17,8 @@ export class Scene_Game extends Scene {
   private _map: Map;
   private _actor: Character_Actor;
 
+  private _lock_walk: boolean;
+  
   constructor(baseInjector: Injector) {
     super(baseInjector);
 
@@ -29,6 +31,7 @@ export class Scene_Game extends Scene {
     super.onInit();
     this.audioManager.playBGM(this.resourceManager.Sound('POL-blooming-short.wav'));
     this.addMap();
+    this._lock_walk = false;
     this.bindEvents();
   }
 
@@ -60,8 +63,16 @@ export class Scene_Game extends Scene {
     this.stage.interactive = true;
     this.update_connection();
     this._map.mapClick$.subscribe((pos) => {
-      console.log(pos);
-      this._map.walkTo(pos, this._connection).subscribe();
+      if (!this._lock_walk) this._lock_walk = true; else return;
+      this.audioManager.playME(this.resourceManager.Sound('walking.wav'));
+      this._map.walkTo(pos, this._connection).subscribe(() => {
+        this._lock_walk = false
+        this.audioManager.stopME();
+      });
+    });
+    this.resize$.subscribe(() => {
+      this._map.x = (this.viewport.width - this._map.width) / 2;
+      this._map.y = (this.viewport.height - this._map.height) / 2;
     });
   }
 

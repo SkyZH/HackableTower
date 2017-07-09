@@ -22,6 +22,10 @@ CC BY 4.0 (for all game resources)
 
 * Keyboard Tap
 
+#### [Freesound](https://freesound.org/)
+
+* [stone_footstep_4.wav by laurenmg95](https://freesound.org/people/laurenmg95/sounds/386694/)
+
 #### [NoiseForFun](http://www.noiseforfun.com/)
 
 * [Menu A](http://www.noiseforfun.com/2012-sound-effects/menu-a/)

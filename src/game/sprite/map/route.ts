@@ -1,4 +1,4 @@
-import { MapPosition } from './map';
+import { MapPosition, MapStatus } from './map';
 import * as _ from 'lodash';
 
 interface ROUTE_STATUS {
@@ -11,7 +11,7 @@ interface ROUTE_STATUS {
 const generate_route = (queue: Array<ROUTE_STATUS>, current: number) => {
   let route = [];
   while(current != -1) {
-    route.push(<MapPosition>{ x: queue[current].x, y: queue[current].y });
+    route.push(<MapStatus>{ x: queue[current].x, y: queue[current].y, direction: queue[current].direction });
     current = queue[current].prev;
   }
   _.reverse(route);
@@ -23,7 +23,7 @@ const ROUTE_DIRECTION = [
   [1, 0, 0, -1]
 ];
 
-export const Map_getRoute = (start: MapPosition, end: MapPosition, connection: boolean[][]): MapPosition[] => {
+export const Map_GetRoute = (start: MapPosition, end: MapPosition, connection: boolean[][]): MapStatus[] => {
   let queue: Array<ROUTE_STATUS> = [<ROUTE_STATUS>{ x: start.x, y: start.y, prev: -1, direction: null }];
   let visited: boolean[][] = _.map(_.range(connection.length), () => _.times(connection[0].length, _.constant(false)));
   let __front = 0;
