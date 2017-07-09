@@ -1,4 +1,4 @@
-import { SceneManager } from '../app';
+import { SceneManager, App } from '../app';
 import { DEFAULT_SCENE } from './config';
 import { Injector, Injectable } from '../di';
 

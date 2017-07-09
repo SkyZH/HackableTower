@@ -1,6 +1,7 @@
 import * as CONST from './const';
 import { Injector, Injectable } from '../di';
 import { SceneManager, AudioManager, PlatformManager, ResourceManager } from './managers';
+import { GameStorage } from '../store';
 
 export class App extends Injectable {
   private _app: PIXI.Application;
@@ -22,6 +23,7 @@ export class App extends Injectable {
     this.injector.selfProvide(AudioManager);
     this.injector.selfProvide(PlatformManager);
     this.injector.selfProvide(SceneManager);
+    this.injector.selfProvide(GameStorage);
   }
 
   public Game <T extends Injectable> (game: { new(...args : any[]): T }) {
