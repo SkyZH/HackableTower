@@ -5,7 +5,7 @@ import { PRELOAD_FN } from '../../app';
 
 @PRELOAD_FN(() => ({ character:  _.chain(MAP_DATA)
   .map((map: MapData) => _.map(map.events, (e: MapEvent) => e.data.character))
-  .union().union().value()
+  .flatten().flatten().uniq().value()
 }))
 export class MAP_RESOURCE extends Injectable {
   constructor(baseInjector: Injector) {

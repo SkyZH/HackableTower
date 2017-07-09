@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import * as _ from 'lodash';
 
-import { Subject, ReplaySubject, Observable } from 'rxjs';
+import { Observable, Subscriber } from 'rxjs';
 import { Injector, Injectable } from '../../di';
 import { GAME_NAME, RESOURCES_PIXI, RESOURCES_HOWL } from '../const';
 
@@ -46,53 +46,54 @@ export class ResourceManager extends Injectable {
 
   public get queueSize(): number { return _.size(this._preload_queue); }
 
-  public preload(whenProgress: Function) {
-    let progress = 0, total = this.queueSize;
+  public preload(): Observable<number> {
+    return new Observable((subscriber: Subscriber<number>) => {
+      let progress = 0, total = this.queueSize;
+      let _loader = new PIXI.loaders.Loader();
 
-    let _loader = new PIXI.loaders.Loader();
+      let onProgress = (do_progress: boolean, check_complete: boolean) => {
+        if (do_progress) {
+          progress++;
+        }
+        if (progress >= total && check_complete) {
+          subscriber.complete();
+        } else {
+          subscriber.next(progress);
+        }
+      };
 
-    let onProgress = (do_progress: boolean, check_complete: boolean) => {
-      if (do_progress) {
-        progress++;
-      }
-      if (progress >= total && check_complete) {
-        whenProgress({ progress, complete: true });
-      } else {
-        whenProgress({ progress, complete: false });
-      }
-    };
-
-    _.forOwn(this._preload_queue, (resource, key) => {
-      let _src = this.getResource(resource.type, resource.path);
-      if (_.includes(RESOURCES_PIXI, resource.type)) {
-        _loader.add(key, _src);
-      } else if (_.includes(RESOURCES_HOWL, resource.type)) {
-        let _sound  =  new Howl({ src: [_src], autoplay: false });
-        _sound.once('load', () => {
-          this._resources[key] = _sound;
+      _.forOwn(this._preload_queue, (resource, key) => {
+        let _src = this.getResource(resource.type, resource.path);
+        if (_.includes(RESOURCES_PIXI, resource.type)) {
+          _loader.add(key, _src);
+        } else if (_.includes(RESOURCES_HOWL, resource.type)) {
+          let _sound  =  new Howl({ src: [_src], autoplay: false });
+          _sound.once('load', () => {
+            this._resources[key] = _sound;
+            onProgress(true, true);
+          });
+        } else {
           onProgress(true, true);
-        });
-      } else {
-        onProgress(true, true);
-      }
-    });
+        }
+      });
 
-    this._preload_queue = {};
+      this._preload_queue = {};
 
-    _loader.load((loader, resources) => {
-      this._resources = _.merge(this._resources, resources);
+      _loader.load((loader, resources) => {
+        this._resources = _.merge(this._resources, resources);
+        onProgress(false, true);
+      });
+
+      _loader.onLoad.add(() => {
+        onProgress(true, false);
+      });
+
+      _loader.onComplete.add(() => {
+        _loader.destroy();
+      });
+
       onProgress(false, true);
     });
-
-    _loader.onLoad.add(() => {
-      onProgress(true, false);
-    });
-
-    _loader.onComplete.add(() => {
-      _loader.destroy();
-    });
-
-    onProgress(false, true);
   }
 };
 

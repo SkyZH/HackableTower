@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import { Observable, Subscriber } from 'rxjs';
 import { Scene } from '../models';
 import { App } from '../app';
 import { ResourceManager } from './resource_manager';
@@ -41,32 +42,37 @@ export class SceneManager extends Injectable {
     return richText;
   }
 
-  private endScene(scene: Scene, cb?: { () }) {
-    let __cnt = 0;
-    const tick = () => {
-      __cnt++;
-      if (__cnt >= 60) {
-        scene.stage.alpha = 0;
-        this.ticker.remove(tick);
-        scene.onDestroy();
-        if (cb) cb();
-      } else scene.stage.alpha = 1 - __cnt / 60;
-    };
-    this.ticker.add(tick);
-    scene.onEnd();
+  private endScene(scene: Scene): Observable<any> {
+    return new Observable((subscriber: Subscriber<any>) => {
+      let __cnt = 0;
+      const tick = () => {
+        __cnt++;
+        if (__cnt >= 60) {
+          scene.stage.alpha = 0;
+          this.ticker.remove(tick);
+          scene.onDestroy();
+          subscriber.next();
+          subscriber.complete();
+        } else scene.stage.alpha = 1 - __cnt / 60;
+      };
+      this.ticker.add(tick);
+      scene.onEnd();
+    });
   }
 
-  private startScene(scene: Scene, cb?: { () }) {
-    this.app.stage.addChild(this._loadingText);
-    let total = this.resourceManager.queueSize;
-    let _sub = this.resourceManager.preload(d => {
-      this._loadingText.text = `加载中 (${d.progress}/${total})`;
-      if (d.complete) {
+  private startScene(scene: Scene): Observable<any> {
+    return new Observable((subscriber: Subscriber<any>) => {
+      this.app.stage.addChild(this._loadingText);
+      let total = this.resourceManager.queueSize;
+      this.resourceManager.preload().subscribe(progress => {
+        this._loadingText.text = `加载中 (${progress}/${total})`;
+      }, null, () => {
         this.app.stage.removeChild(this._loadingText);
         scene.onInit();
         scene.onStart();
-        if (cb) cb();
-      }
+        subscriber.next();
+        subscriber.complete();
+      });
     });
   }
   
@@ -75,16 +81,16 @@ export class SceneManager extends Injectable {
       this._scenes.push(scene);
       this._current = this.injector.create(scene);
       this.refresh();
-      this.startScene(this._current);
+      this.startScene(this._current).subscribe();
     };
-    if (this._current) this.endScene(this._current, tick); else tick();
+    if (this._current) this.endScene(this._current).subscribe(() => tick()); else tick();
   }
 
   public pop() {
     if (_.isEmpty(this._scenes)) {
       throw new Error('scene stack already empty');
     } else {
-      this.endScene(this._current, () => {
+      this.endScene(this._current).subscribe(() => {
         this._scenes.pop();
 
         if (!_.isEmpty(this._scenes)) {
@@ -106,7 +112,7 @@ export class SceneManager extends Injectable {
       this.refresh();
       this.startScene(this._current);
     };
-    if (this._current) this.endScene(this._current, tick); else tick();
+    if (this._current) this.endScene(this._current).subscribe(() => tick()); else tick();
   }
 
   private refresh() {

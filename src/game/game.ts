@@ -12,7 +12,7 @@ export class Main extends Injectable {
   }
 }
 
-import { Scene_Test_Map } from './scenes';
+import { Scene_Test_Map, Scene_Game } from './scenes';
 
 export class Main_Test_Map extends Injectable {
   private sceneManager: SceneManager;
@@ -24,4 +24,14 @@ export class Main_Test_Map extends Injectable {
   }
 }
 
-export const Main_Dev = Main_Test_Map;
+export class Main_Test_Game extends Injectable {
+  private sceneManager: SceneManager;
+
+  constructor(baseInjector: Injector) {
+    super(baseInjector);
+    this.sceneManager = this.injector.resolve(SceneManager);
+    this.sceneManager.push(Scene_Game);
+  }
+}
+
+export const Main_Dev = Main_Test_Game;

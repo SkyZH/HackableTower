@@ -80,3 +80,15 @@ export enum MAPOBJECT {
   __8_6,
   __8_7
 };
+
+export const MAP_WALKABLE = [
+  true, true, true, true, true, true, true, true,
+  false, true, true, true, true, false, false, true,
+  false, false, false, false, false, false, false, false, 
+  false, false, false, false, false, false, false, false, 
+  false, false, false, false, false, false, false, false, 
+  false, false, false, false, false, false, false, false, 
+  false, false, false, false, false, false, false, false, 
+  false, false, false, false, true, true, false, false, 
+  false, false, false, false, true, true, false, false,
+];

@@ -36,10 +36,11 @@ export class Injector {
 }
 
 export abstract class Injectable {
-  protected injector: Injector;
+  private _injector: Injector;
   constructor(baseInjector: Injector) {
-    this.injector = new Injector(baseInjector);
+    this._injector = new Injector(baseInjector);
   }
+  protected get injector(): Injector { return this._injector; }
 
   public initialize(...args: any[]) {};
 }

@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import { Scene, SceneManager, ResourceManager, AudioManager, PRELOAD_RESOURCE, PRELOAD_DEPENDENCY } from '../../app';
 import { Injector, Injectable } from '../../di';
 import { Map, Character_Actor, CHARACTER_DIRECTION, CHARACTER_STATUS } from '../sprite';
@@ -28,7 +29,6 @@ export class Scene_Game extends Scene {
     super.onInit();
     this.audioManager.playBGM(this.resourceManager.Sound('POL-blooming-short.wav'));
     this.addMap();
-    this.addActor();
     this.bindEvents();
   }
 
@@ -42,23 +42,27 @@ export class Scene_Game extends Scene {
   }
 
   public addMap() {
-    this._map = this.injector.init(Map)(MAP_DATA[0]);
+    this._map = this.injector.init(Map)(MAP_DATA[0], this.injector.create(Character_Actor));
+    this._map.actorPos = { x: 7, y: 12 };
     this.spriteManager.add(this._map);
+  }
+
+  private _connection: boolean[][];
+
+  public update_connection() {
+    this._connection = this._map.walkable;
+    _.forEach(this._map.map.events, e => {
+      this._connection[e.x][e.y] = false;
+    });
   }
 
   public bindEvents() {
     this.stage.interactive = true;
-    this.stage.on('pointerdown', () => {
-      this._actor.status = (this._actor.status + 1) % 3;
-      this._actor.direction = (this._actor.direction + 1) % 4;
+    this.update_connection();
+    this._map.mapClick$.subscribe((pos) => {
+      console.log(pos);
+      this._map.walkTo(pos, this._connection).subscribe();
     });
-  }
-
-  public addActor() {
-    this._actor = this.injector.create(Character_Actor);
-    this.spriteManager.add(this._actor);
-    this._actor.direction = CHARACTER_DIRECTION.LEFT;
-    this._actor.status = CHARACTER_STATUS.WALKING;
   }
 
   public onEnd() {
