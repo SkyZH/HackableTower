@@ -1,14 +1,6 @@
 import 'reflect-metadata';
 import * as _ from 'lodash';
 import { Subject } from 'rxjs';
-import { Injectable, Injector } from '../di';
-
-export class GameStorage extends Injectable {
-  constructor(baseInjector: Injector) {
-    super(baseInjector);
-    this.injector.provide(GameStorage, this);
-  }
-};
 
 export const GAME_STORAGE = (name: string) => {
   return function classDecorator<T extends { new(...args:any[]): GameStoreBase }>(constructor:T) {
@@ -17,12 +9,13 @@ export const GAME_STORAGE = (name: string) => {
         super(...args.concat([name]));
       }
     }
+    Reflect.defineMetadata('hackabletower:storage', name, _c);
     _c.prototype = constructor.prototype;
     return _c;
   }
 };
 
-const STORAGE_DATA = function(target: any, propertyKey: string) {
+export const STORAGE_DATA = function(target: any, propertyKey: string) {
   if (!Reflect.defineProperty(target, propertyKey, {
     set: function(value) { this.set(propertyKey, value); },
     get: function() { return this.get(propertyKey); },
@@ -51,7 +44,8 @@ export abstract class GameStoreBase {
     this.invoke(key, value, prev);
   }
 
-  public subscribe(key: string): Subject<any> {
+  public listen(key: string): Subject<any> {
+    this.ensure_key(key);
     if (!this._subjects[key]) this._subjects[key] = new Subject<any>();
     return this._subjects[key];
   };
@@ -69,13 +63,6 @@ export abstract class GameStoreBase {
       v.complete();
     });
   }
-}
 
-@GAME_STORAGE('actor')
-class Storage_Actor extends GameStoreBase {
-
-  constructor(storage: any, target?: string) {
-    super(storage, target);
-  }
-  @STORAGE_DATA x: number;
+  public static get DEFAULT() { return {}; };
 }

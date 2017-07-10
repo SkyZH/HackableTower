@@ -27,13 +27,12 @@ export class Map extends Tileset_Map {
   private _map: MapData;
   private _renderTexture: PIXI.RenderTexture;
   private _sprite: PIXI.Sprite;
-  private _events: Array<Charater_Event>;
+  private _events_sprite: { [id: string]: Charater_Event };
   private m_spriteManager: SpriteManager;
   private _actor: Character;
   private _walkable: boolean[][];
 
-  // TODO: Game Store
-  private _actor_pos: MapPosition;
+  private _actor_status: MapStatus;
 
   protected app: App;
   protected scene: Scene;
@@ -46,7 +45,7 @@ export class Map extends Tileset_Map {
     super(baseInjector);
     this.app = this.injector.resolve(App);
     this.scene = this.injector.resolve(Scene);
-    this._events = new Array<Charater_Event>();
+    this._events_sprite = {};
     this.m_spriteManager = this.injector.init(SpriteManager)(this._container);
     this.injector.provide(SpriteManager, this.m_spriteManager);
     this._walkable = [];
@@ -72,13 +71,26 @@ export class Map extends Tileset_Map {
     });
   }
 
-  public set actorPos(pos: MapPosition) { this._actor_pos = pos; }
-  public get actorPos() { return this._actor_pos; }
+  public set actorStat(pos: MapStatus) { this._actor_status = pos; }
+  public get actorStat(): MapStatus { return this._actor_status; }
+
+  private __get_interactable(pos: MapPosition, target: MapPosition): CHARACTER_DIRECTION {
+    const _D = [
+      [CHARACTER_DIRECTION.__INVALID, CHARACTER_DIRECTION.UP, CHARACTER_DIRECTION.__INVALID],
+      [CHARACTER_DIRECTION.LEFT, CHARACTER_DIRECTION.__NONE, CHARACTER_DIRECTION.RIGHT],
+      [CHARACTER_DIRECTION.__INVALID, CHARACTER_DIRECTION.DOWN, CHARACTER_DIRECTION.__INVALID]
+    ];
+    if (Math.abs(pos.x - target.x) + Math.abs(pos.y - target.y) <= 1) {
+      let _deltaX = target.x - pos.x;
+      let _deltaY = target.y - pos.y;
+      return _D[_deltaY + 1][_deltaX + 1];
+    } else return CHARACTER_DIRECTION.__INVALID;
+  }
 
   public walkTo(pos: MapPosition, connection?: boolean[][]): Observable<any> {
     return new Observable(((subscriber: Subscriber<any>) => {
       this._actor.status = CHARACTER_STATUS.WALKING;
-      let _route = Map_GetRoute(this._actor_pos, pos, connection);
+      let _route = Map_GetRoute(this._actor_status, pos, connection);
       _route.shift();
       let _current = 0;
       const __walkTo = (current: MapPosition, target: MapStatus) => {
@@ -107,9 +119,8 @@ export class Map extends Tileset_Map {
           subscriber.complete();
         } else {
           this._actor.direction = <CHARACTER_DIRECTION>_route[cID].direction;
-          __walkTo(this._actor_pos, _route[cID]).subscribe(() => {
-            this._actor_pos.x = _route[cID].x;
-            this._actor_pos.y = _route[cID].y;
+          __walkTo(this._actor_status, _route[cID]).subscribe(() => {
+            this._actor_status = _route[cID];
             __doWalk(cID + 1);
           });
         }
@@ -120,6 +131,18 @@ export class Map extends Tileset_Map {
 
   public interact(pos: MapPosition): Observable<any> {
     return new Observable(((subscriber: Subscriber<any>) => {
+      _.forOwn(this._map.events, (e: MapEvent, id: string) => {
+        if (e.x == pos.x && e.y == pos.y) {
+          let _direction = this.__get_interactable(this._actor_status, pos);
+          if (_direction != CHARACTER_DIRECTION.__INVALID) {
+            if (_direction != CHARACTER_DIRECTION.__NONE) {
+              this._actor_status.direction = _direction;
+              this.update_actor();
+            }
+          }
+          subscriber.next(id);
+        }
+      })
       subscriber.complete();
     }));
   }
@@ -147,9 +170,9 @@ export class Map extends Tileset_Map {
   }
 
   private update_events() {
-    _.forEach(this._map.events, (e: MapEvent) => {
+    _.forOwn(this._map.events, (e: MapEvent, id: string) => {
       let _character = this.injector.init(Charater_Event)(e.data.character);
-      this._events.push(_character);
+      this._events_sprite[id] = _character;
       _character.container.interactive = true;
       _character.container.buttonMode = true;
       this.m_spriteManager.add(_character);
@@ -160,8 +183,8 @@ export class Map extends Tileset_Map {
   }
 
   private update_actor() {
-    this._actor.x = this._actor_pos.x * this.tileWidth;
-    this._actor.y = this._actor_pos.y * this.tileHeight;
+    [this._actor.x, this._actor.y] = [this._actor_status.x * this.tileWidth, this._actor_status.y * this.tileHeight];
+    this._actor.direction = this._actor_status.direction;
   }
 
   public initialize(map_data: MapData, actor: Character) {

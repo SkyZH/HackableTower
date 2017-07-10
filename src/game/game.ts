@@ -1,6 +1,7 @@
 import { SceneManager, App } from '../app';
 import { DEFAULT_SCENE } from './config';
 import { Injector, Injectable } from '../di';
+import { GameStorage } from '../store';
 
 export class Main extends Injectable {
   private sceneManager: SceneManager;
@@ -34,4 +35,4 @@ export class Main_Test_Game extends Injectable {
   }
 }
 
-export const Main_Dev = Main_Test_Game;
+export const Main_Dev = Main;

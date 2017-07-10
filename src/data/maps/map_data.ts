@@ -5,6 +5,6 @@ export interface MapData {
   data: Array<MAPOBJECT>;
   row: number;
   col: number;
-  events: MapEvent[];
+  events: { [id: string]: MapEvent };
   name?: string;
 };

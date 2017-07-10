@@ -21,9 +21,9 @@ export default <MapData> {
   ],
   row: 15,
   col: 15,
-  events: [
-    E(Door_Orange, 7, 9),
-    E(Stair_Up, 7, 2)
-  ],
+  events: {
+    'door-1': E(Door_Orange, 7, 9),
+    'stair-up': E(Stair_Up, 7, 2)
+  },
   name: '底层'
 };

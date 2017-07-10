@@ -1,9 +1,10 @@
 import * as _ from 'lodash';
 import { Scene, SceneManager, ResourceManager, AudioManager, PRELOAD_RESOURCE, PRELOAD_DEPENDENCY } from '../../app';
 import { Injector, Injectable } from '../../di';
-import { Map, Character_Actor, CHARACTER_DIRECTION, CHARACTER_STATUS } from '../sprite';
+import { Map, Character_Actor, CHARACTER_DIRECTION, CHARACTER_STATUS, MapStatus, MapPosition } from '../sprite';
 import { MAP_DATA } from '../../data';
 import { MAP_RESOURCE } from '../resources';
+import { GameStorage } from '../../store';
 
 @PRELOAD_RESOURCE({
   sound: ['POL-blooming-short.wav', 'walking.wav']
@@ -13,6 +14,7 @@ export class Scene_Game extends Scene {
   protected resourceManager: ResourceManager;
   protected sceneManager: SceneManager;
   protected audioManager: AudioManager;
+  protected GAME_STORAGE: GameStorage;
 
   private _map: Map;
   private _actor: Character_Actor;
@@ -25,6 +27,7 @@ export class Scene_Game extends Scene {
     this.resourceManager = this.injector.resolve(ResourceManager);
     this.sceneManager = this.injector.resolve(SceneManager);
     this.audioManager = this.injector.resolve(AudioManager);
+    this.GAME_STORAGE = this.injector.resolve(GameStorage);
   }
 
   public onInit() {
@@ -35,18 +38,9 @@ export class Scene_Game extends Scene {
     this.bindEvents();
   }
 
-  private bound(x: number, y: number, x_split: number, y_split: number, w: number, h: number) {
-    return new PIXI.Rectangle(
-      (w / x_split) * x,
-      (h / y_split) * y,
-      w / x_split,
-      h / y_split
-    );
-  }
-
   public addMap() {
-    this._map = this.injector.init(Map)(MAP_DATA[0], this.injector.create(Character_Actor));
-    this._map.actorPos = { x: 7, y: 12 };
+    this._map = this.injector.init(Map)(_.clone(MAP_DATA.MAP_0), this.injector.create(Character_Actor));
+    this._map.actorStat = { x: this.GAME_STORAGE.Actor.x, y: this.GAME_STORAGE.Actor.y, direction: this.GAME_STORAGE.Actor.direction };
     this.spriteManager.add(this._map);
   }
 
@@ -66,10 +60,20 @@ export class Scene_Game extends Scene {
       if (!this._lock_walk) this._lock_walk = true; else return;
       this.audioManager.playME(this.resourceManager.Sound('walking.wav'));
       this._map.walkTo(pos, this._connection).subscribe(() => {
-        this._lock_walk = false
+        this._lock_walk = false;
         this.audioManager.stopME();
+        let _status = this._map.actorStat;
+        [this.GAME_STORAGE.Actor.x, this.GAME_STORAGE.Actor.y, this.GAME_STORAGE.Actor.direction] = [_status.x, _status.y, _status.direction];
+        
+        if (Math.abs(_status.x - pos.x) + Math.abs(_status.y - pos.y) <= 2) {
+          this._lock_walk = true;
+          this._map.interact(pos).subscribe((id: string) => {
+            console.log(id);
+          }, () => null, () => this._lock_walk = false);
+        }
       });
     });
+    
     this.resize$.subscribe(() => {
       this._map.x = (this.viewport.width - this._map.width) / 2;
       this._map.y = (this.viewport.height - this._map.height) / 2;

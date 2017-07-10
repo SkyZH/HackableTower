@@ -14,7 +14,9 @@ export enum CHARACTER_DIRECTION {
   DOWN = 0,
   LEFT = 1,
   RIGHT = 2,
-  UP = 3
+  UP = 3,
+  __NONE,
+  __INVALID
 };
 
 export abstract class Character extends Tileset {
