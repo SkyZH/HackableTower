@@ -4,15 +4,16 @@ import { Scene } from '../models';
 import { App } from '../app';
 import { ResourceManager } from './resource_manager';
 import { Injector, Injectable } from '../../di';
+import { Sprite_Loading } from './scene_manager/sprite_loading';
 
 export class SceneManager extends Injectable {
-  private app: App;
-  private resourceManager: ResourceManager;
+  protected app: App;
+  protected resourceManager: ResourceManager;
   private _scenes: Array<{ new(...args : any[]): Scene }>;
   private _current: Scene;
   private ticker: PIXI.ticker.Ticker;
 
-  private _loadingText: PIXI.Text;
+  private _loadingSprite: Sprite_Loading;
 
   constructor(baseInjector: Injector) {
     super(baseInjector);
@@ -24,22 +25,8 @@ export class SceneManager extends Injectable {
     this.ticker = new PIXI.ticker.Ticker;
     this.ticker.start();
 
-    this._loadingText = this.getLoadingText();
-  }
-
-  private getLoadingText() {
-    const style = new PIXI.TextStyle({
-      fontFamily: "Noto Serif CJK SC Medium, Noto Serif, Roboto, Helvetica Neue, Helvetica, Arial, PingFang SC, Hiragino Sans GB, Microsoft YaHei, WenQuanYi Micro Hei, sans-serif",
-      fill: '#cccccc',
-      fontSize: 16
-    });
-
-    const richText = new PIXI.Text('加载中...', style);
-
-    richText.x = 10;
-    richText.y = 10;
-
-    return richText;
+    this._loadingSprite = this.injector.create(Sprite_Loading);
+    this._loadingSprite.onInit();
   }
 
   private endScene(scene: Scene): Observable<any> {
@@ -62,16 +49,27 @@ export class SceneManager extends Injectable {
 
   private startScene(scene: Scene): Observable<any> {
     return new Observable((subscriber: Subscriber<any>) => {
-      this.app.stage.addChild(this._loadingText);
+      this.app.stage.addChild(this._loadingSprite.container);
       let total = this.resourceManager.queueSize;
+      this._loadingSprite.progress = 0;
       this.resourceManager.preload().subscribe(progress => {
-        this._loadingText.text = `加载中 (${progress}/${total})`;
+        this._loadingSprite.progress = progress / total;
       }, null, () => {
-        this.app.stage.removeChild(this._loadingText);
+        this.app.stage.removeChild(this._loadingSprite.container);
+        scene.stage.alpha = 0;
         scene.onInit();
         scene.onStart();
-        subscriber.next();
-        subscriber.complete();
+        let __cnt = 0;
+        const tick = () => {
+          __cnt++;
+          if (__cnt >= 20) {
+            scene.stage.alpha = 1;
+            this.ticker.remove(tick);
+            subscriber.next();
+            subscriber.complete();
+          } else scene.stage.alpha = __cnt / 20;
+        };
+        this.ticker.add(tick);
       });
     });
   }
@@ -96,7 +94,7 @@ export class SceneManager extends Injectable {
         if (!_.isEmpty(this._scenes)) {
           this._current = <Scene> this.injector.create(_.last(this._scenes));
           this.refresh();
-          this.startScene(this._current);
+          this.startScene(this._current).subscribe();
         } else {
           this.refresh();
           this._current = null;

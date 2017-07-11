@@ -7,9 +7,9 @@ export class Sprite extends Injectable {
 
   get container() { return this._container; }
 
-  constructor(baseInjector: Injector) {
+  constructor(baseInjector: Injector, resolveManager?: boolean) {
     super(baseInjector);
-    this.spriteManager = this.injector.resolve(SpriteManager);
+    if (resolveManager == null || resolveManager == true) this.spriteManager = this.injector.resolve(SpriteManager);
     this._container = new PIXI.Container();
   }
 

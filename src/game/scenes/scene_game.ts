@@ -75,7 +75,7 @@ export class Scene_Game extends Scene {
     });
     
     this.resize$.subscribe(() => {
-      this._map.x = (this.viewport.width - this._map.width) / 2;
+      this._map.x = (this.viewport.width - this._map.width) / 2 + 200;
       this._map.y = (this.viewport.height - this._map.height) / 2;
     });
   }
