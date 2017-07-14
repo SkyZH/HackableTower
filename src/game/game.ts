@@ -35,4 +35,4 @@ export class Main_Test_Game extends Injectable {
   }
 }
 
-export const Main_Dev = Main;
+export const Main_Dev = Main_Test_Game;

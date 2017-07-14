@@ -129,22 +129,14 @@ export class Map extends Tileset_Map {
     }));
   }
 
-  public interact(pos: MapPosition): Observable<any> {
-    return new Observable(((subscriber: Subscriber<any>) => {
-      _.forOwn(this._map.events, (e: MapEvent, id: string) => {
-        if (e.x == pos.x && e.y == pos.y) {
-          let _direction = this.__get_interactable(this._actor_status, pos);
-          if (_direction != CHARACTER_DIRECTION.__INVALID) {
-            if (_direction != CHARACTER_DIRECTION.__NONE) {
-              this._actor_status.direction = _direction;
-              this.update_actor();
-            }
-          }
-          subscriber.next(id);
-        }
-      })
-      subscriber.complete();
-    }));
+  public face(pos: MapPosition) {
+    let _direction = this.__get_interactable(this._actor_status, pos);
+    if (_direction != CHARACTER_DIRECTION.__INVALID) {
+      if (_direction != CHARACTER_DIRECTION.__NONE) {
+        this._actor_status.direction = _direction;
+        this.update_actor();
+      }
+    }
   }
 
   private update_map() {

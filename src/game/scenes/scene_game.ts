@@ -1,10 +1,12 @@
 import * as _ from 'lodash';
+import { Observable, Subscriber } from 'rxjs';
 import { Scene, SceneManager, ResourceManager, AudioManager, PRELOAD_RESOURCE, PRELOAD_DEPENDENCY } from '../../app';
 import { Injector, Injectable } from '../../di';
 import { Map, Character_Actor, CHARACTER_DIRECTION, CHARACTER_STATUS, MapStatus, MapPosition } from '../sprite';
-import { MAP_DATA } from '../../data';
+import { MAP_DATA, MapEvent } from '../../data';
 import { MAP_RESOURCE } from '../resources';
 import { GameStorage } from '../../store';
+import { Interpreter } from '../interpreter';
 
 @PRELOAD_RESOURCE({
   sound: ['POL-blooming-short.wav', 'walking.wav']
@@ -15,6 +17,7 @@ export class Scene_Game extends Scene {
   protected sceneManager: SceneManager;
   protected audioManager: AudioManager;
   protected GAME_STORAGE: GameStorage;
+  protected INTERPRETER: Interpreter;
 
   private _map: Map;
   private _actor: Character_Actor;
@@ -28,6 +31,7 @@ export class Scene_Game extends Scene {
     this.sceneManager = this.injector.resolve(SceneManager);
     this.audioManager = this.injector.resolve(AudioManager);
     this.GAME_STORAGE = this.injector.resolve(GameStorage);
+    this.INTERPRETER = this.injector.selfProvide(Interpreter);
   }
 
   public onInit() {
@@ -53,6 +57,38 @@ export class Scene_Game extends Scene {
     });
   }
 
+  private __interpret_event(event: MapEvent): Observable<any> {
+    return new Observable((subscriber: Subscriber<any>) => {
+      let result = this.INTERPRETER.interpret(event);
+      subscriber.next();
+      subscriber.complete();
+    });
+  }
+
+  private __interact(pos: MapPosition): Observable<any> {
+    return new Observable((subscriber: Subscriber<any>) => {
+      let __events = this._map.map.events;
+      let iter = (function* () {
+        yield* _.chain(__events)
+          .pickBy((e: MapEvent) => e.x == pos.x && e.y == pos.y)
+          .map((e: MapEvent, id: string) => ({ id, e }))
+          .value();
+      })();
+      const do_next = () => {
+        let _current = iter.next();
+        if (_current.done) {
+          subscriber.complete();
+          return;
+        }
+        this.__interpret_event(_current.value.e).subscribe(() => {
+          subscriber.next(_current.value.id);
+          do_next();
+        });
+      };
+      do_next();
+    })
+  }
+
   public bindEvents() {
     this.stage.interactive = true;
     this.update_connection();
@@ -67,7 +103,8 @@ export class Scene_Game extends Scene {
         
         if (Math.abs(_status.x - pos.x) + Math.abs(_status.y - pos.y) <= 2) {
           this._lock_walk = true;
-          this._map.interact(pos).subscribe((id: string) => {
+          this._map.face(pos);
+          this.__interact(pos).subscribe((id: string) => {
             console.log(id);
           }, () => null, () => this._lock_walk = false);
         }

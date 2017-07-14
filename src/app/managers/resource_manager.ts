@@ -72,6 +72,9 @@ export class ResourceManager extends Injectable {
             this._resources[key] = _sound;
             onProgress(true, true);
           });
+          _sound.once('loaderror', (id, error) => {
+            subscriber.error({ key, error });
+          });
         } else {
           onProgress(true, true);
         }
@@ -90,6 +93,10 @@ export class ResourceManager extends Injectable {
 
       _loader.onComplete.add(() => {
         _loader.destroy();
+      });
+
+      _loader.on('error', (error, loader, resource: PIXI.loaders.Resource) => {
+        subscriber.error({ key: resource.url, error });
       });
 
       onProgress(false, true);

@@ -52,25 +52,30 @@ export class SceneManager extends Injectable {
       this.app.stage.addChild(this._loadingSprite.container);
       let total = this.resourceManager.queueSize;
       this._loadingSprite.progress = 0;
-      this.resourceManager.preload().subscribe(progress => {
-        this._loadingSprite.progress = progress / total;
-      }, null, () => {
-        this.app.stage.removeChild(this._loadingSprite.container);
-        scene.stage.alpha = 0;
-        scene.onInit();
-        scene.onStart();
-        let __cnt = 0;
-        const tick = () => {
-          __cnt++;
-          if (__cnt >= 20) {
-            scene.stage.alpha = 1;
-            this.ticker.remove(tick);
-            subscriber.next();
-            subscriber.complete();
-          } else scene.stage.alpha = __cnt / 20;
-        };
-        this.ticker.add(tick);
-      });
+      this._loadingSprite.error = false;
+      this.resourceManager.preload().subscribe(
+        progress => {
+          this._loadingSprite.progress = progress / total;
+        }, 
+        () => this._loadingSprite.error = true, 
+        () => {
+          this.app.stage.removeChild(this._loadingSprite.container);
+          scene.stage.alpha = 0;
+          scene.onInit();
+          scene.onStart();
+          let __cnt = 0;
+          const tick = () => {
+            __cnt++;
+            if (__cnt >= 20) {
+              scene.stage.alpha = 1;
+              this.ticker.remove(tick);
+              subscriber.next();
+              subscriber.complete();
+            } else scene.stage.alpha = __cnt / 20;
+          };
+          this.ticker.add(tick);
+        }
+      );
     });
   }
   

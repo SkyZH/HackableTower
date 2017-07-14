@@ -60,36 +60,15 @@ export class Scene_Menu extends Scene {
     
     this.resize$.subscribe(() => {
       menuWindow.width = 300;
-      menuWindow.y = this.viewport.height - 100 - menuWindow.height;
+      menuWindow.y = (this.viewport.height - menuWindow.height) / 2;
       menuWindow.x = (this.viewport.width - menuWindow.width) / 2;
     });
-  }
-
-  private get titleText() {
-    const style = new PIXI.TextStyle({
-      fontFamily: FONT.FONT_FAMILY_TITLE,
-      fill: '#ffffff',
-      fontSize: FONT.FONT_SIZE_DISPLAY_3,
-      stroke: '#000000',
-      strokeThickness: 1
-    });
-
-    const richText = new PIXI.Text('Magic Tower !Hackable', style);
-    this.resize$.subscribe(() => {
-      richText.x = this.viewport.width / 2;
-      richText.y = this.viewport.height / 2;
-    });
-
-    richText.anchor.set(0.5);
-
-    return richText;
   }
 
   onInit() {
     super.onInit();
 
     this.stage.addChild(this.bgSprite);
-    this.stage.addChild(this.titleText);
     this.addMenuWindow();
   }
 
