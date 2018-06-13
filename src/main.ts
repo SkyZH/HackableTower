@@ -1,4 +1,11 @@
-import './styles/app.scss';
+import 'core-js/client/shim';
+import 'reflect-metadata';
+import 'rxjs';
+import 'lodash';
+import 'moment';
+import 'pixi.js';
+import 'howler';
+
 import { App } from './app';
 import { bootstrap } from './di';
 import { Main, Main_Dev } from './game';

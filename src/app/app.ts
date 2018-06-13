@@ -13,7 +13,7 @@ export class App extends Injectable {
     super(baseInjector);
     this.injector.provide(App, this);
 
-    this._app = new PIXI.Application(800, 600, {
+    this._app = new PIXI.Application(1920, 1080, {
       backgroundColor : CONST.BACKGROUND_COLOR,
       resolution: CONST.RESOLUTION,
       view: <HTMLCanvasElement> document.getElementById('canvas_main')

@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import { Character } from '../../game/sprite';
 
 export interface MapEventData {
   character: string;

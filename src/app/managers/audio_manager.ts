@@ -48,7 +48,7 @@ export class AudioManager extends Injectable {
 
   public playME(sound: Howl) {
     this.play(sound, 'me', true, false, 1, true);
-  }
+  } 
 
   public stopBGM() {
     this.stop('bgm', false);

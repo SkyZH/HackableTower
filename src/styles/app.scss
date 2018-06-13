@@ -1,4 +1,8 @@
-.overlay-main {
+.fullscreen {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: fixed;
   top: 0;
   bottom: 0;

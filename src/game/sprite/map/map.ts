@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { Subject, Observable, Subscriber } from 'rxjs';
+import { Subject, Observable, Subscriber, timer } from 'rxjs';
 
 import { Sprite, Scene } from '../../../app';
 import { Injector } from '../../../di';
@@ -7,7 +7,7 @@ import { CHARACTER } from '../../const';
 import { Tileset_Map } from '../tileset';
 import { MapData, MapEvent, MAP_WALKABLE } from '../../../data';
 import { App, SpriteManager } from '../../../app';
-import { Charater_Event, Character, CHARACTER_STATUS, CHARACTER_DIRECTION } from '../character';
+import { Charater_Event, Character, Character_Animation, CHARACTER_STATUS, CHARACTER_DIRECTION } from '../character';
 import { Map_GetRoute } from './route';
 import { LINEAR } from '../../util/animation/linear';
 
@@ -56,7 +56,8 @@ export class Map extends Tileset_Map {
     this.m_spriteManager.onInit();
     this._sprite = new PIXI.Sprite();
     this._container.addChild(this._sprite);
-    this.update_map();
+    this.init_map();
+    this.init_actor();
     this.update_events();
     this.update_actor();
     this._container.interactive = true;
@@ -139,7 +140,37 @@ export class Map extends Tileset_Map {
     }
   }
 
-  private update_map() {
+  public animate_event(event_id: string, animation: Character_Animation[]): Observable<any> {
+    return new Observable((sub: Subscriber<any>) => {
+      let __index = 0;
+      let character = this._events_sprite[event_id];
+      const process_event = () => {
+        while (__index < animation.length) {
+          if (animation[__index].direction) {
+            character.direction = animation[__index].direction;
+            __index++;
+          }
+          else if (animation[__index].status) {
+            character.status = animation[__index].status;
+            __index++;
+          }
+          else if (animation[__index].pause) {
+            timer(animation[__index].pause).subscribe(() => process_event());
+            __index++;
+            return;
+          } else {
+            __index++;
+          }
+        }
+        sub.next();
+        sub.complete();
+        return;
+      }
+      process_event();
+    });
+  }
+
+  private init_map() {
     let __map_sprites = [];
     let __container = new PIXI.Container;
     this._renderTexture = PIXI.RenderTexture.create(this.width, this.height);
@@ -161,17 +192,28 @@ export class Map extends Tileset_Map {
     __container.destroy();
   }
 
-  private update_events() {
-    _.forOwn(this._map.events, (e: MapEvent, id: string) => {
-      let _character = this.injector.init(Charater_Event)(e.data.character);
-      this._events_sprite[id] = _character;
-      _character.container.interactive = true;
-      _character.container.buttonMode = true;
-      this.m_spriteManager.add(_character);
-      _character.x = e.x * this.tileWidth;
-      _character.y = e.y * this.tileHeight;
-    });
+  private init_actor() {
     this.m_spriteManager.add(this._actor);
+  }
+
+  public update_events() {
+    _.forOwn(this._events_sprite, (v, id) => {
+      if (!(id in this._map.events)) {
+        this.m_spriteManager.remove(this._events_sprite[id]);
+        delete this._events_sprite[id];
+      }
+    })
+    _.forOwn(this._map.events, (e: MapEvent, id: string) => {
+      if (!this._events_sprite[id]) {
+        let _character = this.injector.init(Charater_Event)(e.data.character);
+        this._events_sprite[id] = _character;
+        _character.container.interactive = true;
+        _character.container.buttonMode = true;
+        this.m_spriteManager.add(_character);
+        _character.x = e.x * this.tileWidth;
+        _character.y = e.y * this.tileHeight;
+      }
+    });
   }
 
   private update_actor() {

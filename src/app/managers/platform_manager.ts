@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import { Observable, fromEvent } from 'rxjs';
 import * as _ from 'lodash';
 
 import { Injector, Injectable } from '../../di';
@@ -16,7 +16,7 @@ export class PlatformManager extends Injectable {
 
     this.app = this.injector.resolve(App);
 
-    this._resize$ = Observable.fromEvent(window, 'resize');
+    this._resize$ = fromEvent(window, 'resize');
     this.resize$.subscribe(this.onResize);
     this.onResize();
   }

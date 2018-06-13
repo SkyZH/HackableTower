@@ -19,6 +19,12 @@ export enum CHARACTER_DIRECTION {
   __INVALID
 };
 
+export interface Character_Animation {
+  status?: CHARACTER_STATUS;
+  direction?: CHARACTER_DIRECTION;
+  pause?: number;
+}
+
 export abstract class Character extends Tileset {
 
   private _character: PIXI.Sprite;

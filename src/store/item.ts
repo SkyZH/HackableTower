@@ -7,14 +7,14 @@ export class Storage_Item extends GameStoreBase {
     super(storage, target);
   }
   
-  @STORAGE_DATA key_yellow: number;
+  @STORAGE_DATA key_orange: number;
   @STORAGE_DATA key_blue: number;
   @STORAGE_DATA key_red: number;
 
   public static get DEFAULT() {
     return {
       key_blue: 0,
-      key_yellow: 0,
+      key_yellow: 1,
       key_red: 0
     };
   }

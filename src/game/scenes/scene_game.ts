@@ -2,11 +2,11 @@ import * as _ from 'lodash';
 import { Observable, Subscriber } from 'rxjs';
 import { Scene, SceneManager, ResourceManager, AudioManager, PRELOAD_RESOURCE, PRELOAD_DEPENDENCY } from '../../app';
 import { Injector, Injectable } from '../../di';
-import { Map, Character_Actor, CHARACTER_DIRECTION, CHARACTER_STATUS, MapStatus, MapPosition } from '../sprite';
+import { Map, Character_Actor, CHARACTER_DIRECTION, CHARACTER_STATUS, Character_Animation, MapStatus, MapPosition } from '../sprite';
 import { MAP_DATA, MapEvent } from '../../data';
 import { MAP_RESOURCE } from '../resources';
 import { GameStorage } from '../../store';
-import { Interpreter } from '../interpreter';
+import { Interpreter, Interpreter_Action } from '../interpreter';
 
 @PRELOAD_RESOURCE({
   sound: ['POL-blooming-short.wav', 'walking.wav']
@@ -50,18 +50,15 @@ export class Scene_Game extends Scene {
 
   private _connection: boolean[][];
 
-  public update_connection() {
-    this._connection = this._map.walkable;
-    _.forEach(this._map.map.events, e => {
-      this._connection[e.x][e.y] = false;
-    });
+  public update_map() {
+    this._map.update_events();
+    this.update_connection();
   }
 
-  private __interpret_event(event: MapEvent): Observable<any> {
-    return new Observable((subscriber: Subscriber<any>) => {
-      let result = this.INTERPRETER.interpret(event);
-      subscriber.next();
-      subscriber.complete();
+  public update_connection() {
+    this._connection = _.cloneDeep(this._map.walkable);
+    _.forEach(this._map.map.events, e => {
+      this._connection[e.x][e.y] = false;
     });
   }
 
@@ -80,7 +77,25 @@ export class Scene_Game extends Scene {
           subscriber.complete();
           return;
         }
-        this.__interpret_event(_current.value.e).subscribe(() => {
+        this.INTERPRETER.interpret(_current.value.e).subscribe((actions: Interpreter_Action[]) => {
+          let __index = 0;
+          const __interpret = () => {
+            while (__index < actions.length) {
+              if (actions[__index].animate) {
+                this._map.animate_event(_current.value.id, actions[__index].animate).subscribe(() => __interpret());
+                __index++;
+                return;
+              } else if (actions[__index].dispose) {
+                delete __events[_current.value.id];
+                this.update_map();
+                __index++;
+              } else {
+                __index++;
+              }
+            }
+          };
+          __interpret();
+        }, null, () => {
           subscriber.next(_current.value.id);
           do_next();
         });
@@ -101,12 +116,10 @@ export class Scene_Game extends Scene {
         let _status = this._map.actorStat;
         [this.GAME_STORAGE.Actor.x, this.GAME_STORAGE.Actor.y, this.GAME_STORAGE.Actor.direction] = [_status.x, _status.y, _status.direction];
         
-        if (Math.abs(_status.x - pos.x) + Math.abs(_status.y - pos.y) <= 2) {
+        if (Math.abs(_status.x - pos.x) + Math.abs(_status.y - pos.y) <= 1) {
           this._lock_walk = true;
           this._map.face(pos);
-          this.__interact(pos).subscribe((id: string) => {
-            console.log(id);
-          }, () => null, () => this._lock_walk = false);
+          this.__interact(pos).subscribe((id: string) => {}, () => null, () => this._lock_walk = false);
         }
       });
     });

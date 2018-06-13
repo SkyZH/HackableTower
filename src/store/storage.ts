@@ -13,6 +13,7 @@ export class GameStorage extends Injectable {
   private _storage: {};
 
   public get Actor() { return this._Actor; }
+  public get Item() { return this._Item; }
 
   constructor(baseInjector: Injector) {
     super(baseInjector);
@@ -33,7 +34,10 @@ export class GameStorage extends Injectable {
   
   public initialize() {
     this.clear();
-    this._storage = _.merge({}, this.getDefault(Storage_Actor));
+    this._storage = _.merge({}, 
+      this.getDefault(Storage_Actor), 
+      this.getDefault(Storage_Item)
+    );
     this._Actor = new Storage_Actor(this._storage);
     this._Item = new Storage_Item(this._storage);
   }
