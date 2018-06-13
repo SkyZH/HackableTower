@@ -3,10 +3,14 @@ import { Injectable, Injector } from '../../di';
 import { MAP_DATA, MapData, MapEvent } from '../../data';
 import { PRELOAD_FN } from '../../app';
 
-@PRELOAD_FN(() => ({ character:  _.chain(MAP_DATA)
-  .map((map: MapData) => _.map(map.events, (e: MapEvent) => e.data.character))
-  .flatten().flatten().uniq().value()
-}))
+const get_res = (key) => _.chain(MAP_DATA)
+  .map((map: MapData) => _.map(map.events, (e: MapEvent) => e.data[key]))
+  .flatten().flatten().uniq().filter(d => d).value()
+@PRELOAD_FN(() => (
+  { 
+    character: get_res('character'),
+    sound: get_res('sound')
+  }))
 export class MAP_RESOURCE extends Injectable {
   constructor(baseInjector: Injector) {
     super(baseInjector);

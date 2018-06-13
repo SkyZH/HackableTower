@@ -9,7 +9,7 @@ import { GameStorage } from '../../store';
 import { Interpreter, Interpreter_Action } from '../interpreter';
 
 @PRELOAD_RESOURCE({
-  sound: ['POL-blooming-short.wav', 'walking.wav']
+  sound: ['POL-perfect-engineering-short.wav', 'walking.wav']
 })
 @PRELOAD_DEPENDENCY([Map, Character_Actor, MAP_RESOURCE])
 export class Scene_Game extends Scene {
@@ -26,7 +26,7 @@ export class Scene_Game extends Scene {
   
   constructor(baseInjector: Injector) {
     super(baseInjector);
-
+    
     this.resourceManager = this.injector.resolve(ResourceManager);
     this.sceneManager = this.injector.resolve(SceneManager);
     this.audioManager = this.injector.resolve(AudioManager);
@@ -36,7 +36,7 @@ export class Scene_Game extends Scene {
 
   public onInit() {
     super.onInit();
-    this.audioManager.playBGM(this.resourceManager.Sound('POL-blooming-short.wav'));
+    this.audioManager.playBGM(this.resourceManager.Sound('POL-perfect-engineering-short.wav'));
     this.addMap();
     this._lock_walk = false;
     this.bindEvents();
@@ -81,7 +81,11 @@ export class Scene_Game extends Scene {
           let __index = 0;
           const __interpret = () => {
             while (__index < actions.length) {
-              if (actions[__index].animate) {
+              if (actions[__index].se) {
+                this.audioManager.playSE(this.resourceManager.Sound(actions[__index].se));
+                __index++;
+              }
+              else if (actions[__index].animate) {
                 this._map.animate_event(_current.value.id, actions[__index].animate).subscribe(() => __interpret());
                 __index++;
                 return;

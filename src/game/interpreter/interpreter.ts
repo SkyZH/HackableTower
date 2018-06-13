@@ -8,6 +8,7 @@ import { Observable, Subscriber } from 'rxjs';
 export interface Interpreter_Action {
   animate?: Character_Animation[];
   dispose?: boolean;
+  se? : string;
 }
 
 export class Interpreter extends Injectable {
@@ -40,6 +41,7 @@ export class Interpreter extends Injectable {
       if (event.data.type == MAPEVENT_TYPE.DOOR) {
         if (this.check_item(event.options.item)) {
           subscriber.next(<Interpreter_Action[]>[
+            { se: 'door_open.mp3' },
             { animate: <Character_Animation> [
               { direction: CHARACTER_DIRECTION.LEFT },
               { pause: 200 },
