@@ -41,17 +41,35 @@ export class Scene_Game extends Scene {
   public onInit() {
     super.onInit();
     this.audioManager.playBGM(this.resourceManager.Sound('POL-perfect-engineering-short.wav'));
-    this.addMap();
+    this.init_map();
     this.addActorWindow();
     this.addMenuWindow();
     this._lock_walk = false;
     this.bindEvents();
   }
 
-  private addMap() {
-    this._map = this.injector.init(Map)(_.clone(MAP_DATA.MAP_0), this.injector.create(Character_Actor));
-    this._map.actorStat = { x: this.GAME_STORAGE.Actor.x, y: this.GAME_STORAGE.Actor.y, direction: this.GAME_STORAGE.Actor.direction };
+  private init_map() {
+    this.goto_map(this.GAME_STORAGE.Actor.mapID, this.GAME_STORAGE.Actor.x, this.GAME_STORAGE.Actor.y, this.GAME_STORAGE.Actor.direction);
+  }
+
+  private get_map(mapID: string) {
+    let map = _.cloneDeep(MAP_DATA[mapID]);
+    _.forOwn(this.GAME_STORAGE.Event.event_disposed, (disposed, id) => {
+      if (disposed && id.startsWith(mapID)) {
+        delete map.events[id.match(/(.*)#(.*)/)[2]];
+      }
+    });
+    return map;
+  }
+  private goto_map(mapID: string, x: number, y: number, direction: CHARACTER_DIRECTION) {
+    if (this._map) this.spriteManager.remove(this._map);
+    this._map = this.injector.init(Map)(this.get_map(mapID), this.injector.create(Character_Actor));
+    this._map.actorStat = { x, y, direction };
     this.spriteManager.add(this._map);
+    this._map.x = (this.viewport.width - this._map.width) / 2 + 200;
+    this._map.y = (this.viewport.height - this._map.height) / 2;
+    this.update_map();
+    this._map.mapClick$.subscribe((pos) => this.process_map_click(pos));
   }
 
   private addActorWindow() {
@@ -67,7 +85,7 @@ export class Scene_Game extends Scene {
     const menuWindow = this.injector.create(Window_Command);
     this.spriteManager.add(menuWindow);
     menuWindow.commands = ([
-      <Command> { name: '菜单', cb: () => this.sceneManager.pop() },
+      <Command> { name: '保存', cb: () => this.GAME_STORAGE.save() },
       <Command> { name: '退出', cb: () => this.sceneManager.pop() },
     ]);
     menuWindow.width = 200;
@@ -116,12 +134,21 @@ export class Scene_Game extends Scene {
               }
               else if (actions[__index].animate) {
                 this._map.animate_event(_current.value.id, actions[__index].animate).subscribe(() => __interpret());
-                __index++;
+                __index++; 
                 return;
               } else if (actions[__index].dispose) {
                 delete __events[_current.value.id];
+                this.GAME_STORAGE.Event.event_disposed[`${this.GAME_STORAGE.Actor.mapID}#${_current.value.id}`] = true;
                 this.update_map();
                 __index++;
+              } else if (actions[__index].teleport) {
+                let options = actions[__index].teleport;
+                this.GAME_STORAGE.Actor.mapID = options.mapID;
+                this.GAME_STORAGE.Actor.x = options.x;
+                this.GAME_STORAGE.Actor.y = options.y;
+                this.goto_map(this.GAME_STORAGE.Actor.mapID, this.GAME_STORAGE.Actor.x, this.GAME_STORAGE.Actor.y, this.GAME_STORAGE.Actor.direction);
+                subscriber.complete();
+                return;
               } else {
                 __index++;
               }
@@ -137,25 +164,24 @@ export class Scene_Game extends Scene {
     })
   }
 
+  private process_map_click(pos) {
+    if (!this._lock_walk) this._lock_walk = true; else return;
+    this.audioManager.playME(this.resourceManager.Sound('walking.wav'));
+    this._map.walkTo(pos, this._connection).subscribe(() => {
+      this._lock_walk = false;
+      this.audioManager.stopME();
+      let _status = this._map.actorStat;
+      [this.GAME_STORAGE.Actor.x, this.GAME_STORAGE.Actor.y, this.GAME_STORAGE.Actor.direction] = [_status.x, _status.y, _status.direction];
+      
+      if (Math.abs(_status.x - pos.x) + Math.abs(_status.y - pos.y) <= 1) {
+        this._lock_walk = true;
+        this._map.face(pos);
+        this.__interact(pos).subscribe((id: string) => {}, () => null, () => this._lock_walk = false);
+      }
+    });
+  }
   public bindEvents() {
     this.stage.interactive = true;
-    this.update_connection();
-    this._map.mapClick$.subscribe((pos) => {
-      if (!this._lock_walk) this._lock_walk = true; else return;
-      this.audioManager.playME(this.resourceManager.Sound('walking.wav'));
-      this._map.walkTo(pos, this._connection).subscribe(() => {
-        this._lock_walk = false;
-        this.audioManager.stopME();
-        let _status = this._map.actorStat;
-        [this.GAME_STORAGE.Actor.x, this.GAME_STORAGE.Actor.y, this.GAME_STORAGE.Actor.direction] = [_status.x, _status.y, _status.direction];
-        
-        if (Math.abs(_status.x - pos.x) + Math.abs(_status.y - pos.y) <= 1) {
-          this._lock_walk = true;
-          this._map.face(pos);
-          this.__interact(pos).subscribe((id: string) => {}, () => null, () => this._lock_walk = false);
-        }
-      });
-    });
     
     this.resize$.subscribe(() => {
       this._map.x = (this.viewport.width - this._map.width) / 2 + 200;

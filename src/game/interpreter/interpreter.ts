@@ -9,6 +9,7 @@ export interface Interpreter_Action {
   animate?: Character_Animation[];
   dispose?: boolean;
   se? : string;
+  teleport? : any
 }
 
 export class Interpreter extends Injectable {
@@ -53,6 +54,11 @@ export class Interpreter extends Injectable {
             { dispose: true }
           ]);
         } 
+      } else if (event.data.type == MAPEVENT_TYPE.STAIRS) {
+        subscriber.next(<Interpreter_Action[]>[
+          { se: 'door_open.mp3' },
+          { teleport: { mapID: event.options.mapID, x: event.options.x, y: event.options.y } }
+        ]);
       }
       subscriber.complete();
     });

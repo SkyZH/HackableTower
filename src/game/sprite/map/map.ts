@@ -210,6 +210,8 @@ export class Map extends Tileset_Map {
         _character.container.interactive = true;
         _character.container.buttonMode = true;
         this.m_spriteManager.add(_character);
+        if (e.options.character_direction) _character.direction = e.options.character_direction;
+        if (e.data.tileID) _character.frame = e.data.tileID;
         _character.x = e.x * this.tileWidth;
         _character.y = e.y * this.tileHeight;
       }

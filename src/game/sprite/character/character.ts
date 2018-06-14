@@ -29,7 +29,8 @@ export abstract class Character extends Tileset {
 
   private _character: PIXI.Sprite;
   private _status: CHARACTER_STATUS;
-  private frame: number;
+  private _frame: number;
+  private _current_frame:  number;
   private _direction: CHARACTER_DIRECTION;
   private _ticker: PIXI.ticker.Ticker;
   private _animationStart: number;
@@ -42,7 +43,7 @@ export abstract class Character extends Tileset {
   onInit() {
     super.onInit();
     this._character = new PIXI.Sprite(this.getTile(0, 0));
-    this.frame = 0;
+    this._current_frame = 0;
     this._status = CHARACTER_STATUS.STOP;
     this._direction = CHARACTER_DIRECTION.DOWN;
     this._animationStart = 0;
@@ -58,14 +59,16 @@ export abstract class Character extends Tileset {
 
   private update_character = () => {
     let __frame = this._direction * 4;
-    if (this._status == CHARACTER_STATUS.WALKING) {
-      __frame += Math.floor((this._ticker.lastTime - this._animationStart) / CHARACTER.CHARACTER_SPRITE_SPEED_WALK) % 4;
-    } else if (this.status == CHARACTER_STATUS.RUNNING) {
-      __frame += Math.floor((this._ticker.lastTime - this._animationStart) / CHARACTER.CHARACTER_SPRITE_SPEED_RUN) % 4;
-    }
-    if (__frame != this.frame) {
-      this.frame = __frame;
-      this._character.texture = this.getTileID(__frame);
+    if (this.status != CHARACTER_STATUS.STOP) {
+      if (this._status == CHARACTER_STATUS.WALKING) {
+        __frame += Math.floor((this._ticker.lastTime - this._animationStart) / CHARACTER.CHARACTER_SPRITE_SPEED_WALK) % 4;
+      } else if (this.status == CHARACTER_STATUS.RUNNING) {
+        __frame += Math.floor((this._ticker.lastTime - this._animationStart) / CHARACTER.CHARACTER_SPRITE_SPEED_RUN) % 4;
+      }
+      if (__frame != this._current_frame) {
+        this._current_frame = __frame;
+        this._character.texture = this.getTileID(__frame);
+      }
     }
   };
   
@@ -76,12 +79,18 @@ export abstract class Character extends Tileset {
   public get direction(): CHARACTER_DIRECTION { return this._direction; }
   public set direction(direction: CHARACTER_DIRECTION) { 
     this._direction = direction; 
-    this.update_character();
+    this._character.texture = this.getTileID(this.direction * 4);
   }
   public get status(): CHARACTER_STATUS { return this._status; }
   public set status(status: CHARACTER_STATUS) { 
     this._status = status;
     this._animationStart = this._ticker.lastTime;
+    this._character.texture = this.getTileID(this.direction * 4);
     this.update_character();
+  }
+  public get frame() { return this._frame; }
+  public set frame(frame: number) {
+    this._frame = frame;
+    this._character.texture = this.getTileID(this.direction * 4 + frame);
   }
 }

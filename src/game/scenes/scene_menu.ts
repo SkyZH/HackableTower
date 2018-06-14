@@ -3,6 +3,7 @@ import { Scene, SceneManager, AudioManager, ResourceManager, PlatformManager, PR
 import { Scene_Game } from './scene_game';
 import { Window_Command, Window } from '../sprite';
 import { Command } from '../models';
+import { GameStorage } from '../../store';
 import { COS } from '../util/animation/cos';
 import { FONT } from '../const';
 
@@ -15,6 +16,7 @@ export class Scene_Menu extends Scene {
   protected resourceManager: ResourceManager;
   protected sceneManager: SceneManager;
   protected audioManager: AudioManager;
+  private GAME_STORAGE: GameStorage;
 
   constructor(baseInjector: Injector) {
     super(baseInjector);
@@ -22,6 +24,7 @@ export class Scene_Menu extends Scene {
     this.resourceManager = this.injector.resolve(ResourceManager);
     this.sceneManager = this.injector.resolve(SceneManager);
     this.audioManager = this.injector.resolve(AudioManager);
+    this.GAME_STORAGE = this.injector.resolve(GameStorage);
   }
 
   private get bgSprite() {
@@ -47,8 +50,14 @@ export class Scene_Menu extends Scene {
     const menuWindow = this.injector.create(Window_Command);
     this.spriteManager.add(menuWindow);
     menuWindow.commands = ([
-      <Command> { name: '新存档', cb: () => this.sceneManager.push(Scene_Game) },
-      <Command> { name: '继续' },
+      <Command> { name: '新存档', cb: () => {
+        this.GAME_STORAGE.default();
+        this.sceneManager.push(Scene_Game);
+      } },
+      <Command> { name: '继续', cb: () => {
+        this.GAME_STORAGE.load();
+        this.sceneManager.push(Scene_Game);
+      }},
       <Command> { name: '关于', cb: () => { window.open("https://github.com/SkyZH/HackableTower") } },
       <Command> { name: '设置' },
       <Command> { name: '退出', cb: () => {

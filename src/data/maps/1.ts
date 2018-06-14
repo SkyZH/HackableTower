@@ -1,5 +1,5 @@
 import { MapData } from './map_data';
-import { E, Door_Orange, Stair_Up } from '../events';
+import { E, Door_Orange, Stair_Up, Stair_Down } from '../events';
 
 export default <MapData> {
   data: [
@@ -22,8 +22,8 @@ export default <MapData> {
   row: 15,
   col: 15,
   events: {
-    'door-1': E(Door_Orange, 7, 9),
-    'stair-up': E(Stair_Up, 7, 2, { mapID: 'MAP_1', x: 7, y: 3 })
+    'stair-down': E(Stair_Down, 7, 2, { mapID: 'MAP_0', x: 7, y: 3 }),
+    'stair-up': E(Stair_Up, 7, 11)
   },
-  name: '底层'
+  name: '第一层'
 };

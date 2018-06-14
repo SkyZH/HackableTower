@@ -2,6 +2,7 @@ import { Window } from '../sprite';
 import { Injector } from '../../di';
 import { GameStorage } from '../../store';
 import { SubscriptionManaged } from '../../app';
+import { MAP_DATA, MapEvent } from '../../data';
 
 export class Window_Actor extends Window {
   protected GAME_STORAGE: GameStorage;
@@ -22,7 +23,7 @@ Lv.1
 橙色钥匙 ${this.GAME_STORAGE.Item.key_orange}
 红色钥匙 ${this.GAME_STORAGE.Item.key_red}
 蓝色钥匙 ${this.GAME_STORAGE.Item.key_blue}
-第 0 层
+${MAP_DATA[this.GAME_STORAGE.Actor.mapID].name}
 `;
   }
 
@@ -37,6 +38,7 @@ Lv.1
     this._context.sub(this.GAME_STORAGE.Item.listen('key_orange').subscribe(() => this.update_text()));
     this._context.sub(this.GAME_STORAGE.Item.listen('key_blue').subscribe(() => this.update_text()));
     this._context.sub(this.GAME_STORAGE.Item.listen('key_red').subscribe(() => this.update_text()));
+    this._context.sub(this.GAME_STORAGE.Actor.listen('mapID').subscribe(() => this.update_text()));
     this.window_container.addChild(this._text);
     this._text.x = 10;
     this._text.y = 10;

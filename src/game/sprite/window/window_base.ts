@@ -1,6 +1,5 @@
 import { Sprite, SpriteManager, getPropertyDescriptor } from '../../../app';
 import { Injector } from '../../../di';
-import Super from './super';
 
 export class Window extends Sprite {
   private graphics_bound: PIXI.Graphics;

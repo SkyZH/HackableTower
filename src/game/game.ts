@@ -27,12 +27,15 @@ export class Main_Test_Map extends Injectable {
 
 export class Main_Test_Game extends Injectable {
   private sceneManager: SceneManager;
+  private GAME_STORAGE: GameStorage;
 
   constructor(baseInjector: Injector) {
     super(baseInjector);
     this.sceneManager = this.injector.resolve(SceneManager);
-    this.sceneManager.push(DEFAULT_SCENE);
+    this.GAME_STORAGE = this.injector.resolve(GameStorage);
+    this.GAME_STORAGE.default();
+    this.sceneManager.push(Scene_Game);
   }
 }
 
-export const Main_Dev = Main_Test_Game;
+export const Main_Dev = Main;
