@@ -22,8 +22,8 @@ export class Window_Selectable extends Window {
     this.graphics_select.lineStyle(1, 0xffffff, 1);
     this.graphics_select.beginFill(0xffffff, 0.8);
     this.graphics_select.drawRoundedRect(
-      this.x + this.selectBound.x,
-      this.y + this.selectBound.y,
+      this.selectBound.x,
+      this.selectBound.y,
       this.selectBound.width, this.selectBound.height , 2
     );
     this.graphics_select.endFill();
@@ -67,7 +67,7 @@ export class Window_Selectable extends Window {
 
   public onInit() {
     super.onInit();
-    this._container.addChild(this.graphics_select);
+    this.window_container.addChild(this.graphics_select);
     this.scene.ticker.add(t => {
       this.graphics_select.alpha =  COS(this.scene.ticker.lastTime, 2000, 0.5, 1);
     });
@@ -75,7 +75,7 @@ export class Window_Selectable extends Window {
   }
 
   public onDestroy() {
-    this._container.removeChild(this.graphics_select);
+    this.window_container.removeChild(this.graphics_select);
     this.graphics_select.destroy();
     super.onDestroy();
   }

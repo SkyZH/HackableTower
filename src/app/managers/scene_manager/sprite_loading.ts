@@ -3,8 +3,8 @@ import { Sprite } from '../../models';
 import { PlatformManager } from '../platform_manager';
 import { App } from '../../app';
 
-const LOADING_BAR_WIDTH: number = 200;
-const LOADING_BAR_HEIGHT: number = 5;
+const LOADING_BAR_WIDTH: number = 400;
+const LOADING_BAR_HEIGHT: number = 8;
 
 export class Sprite_Loading extends Sprite {
 
@@ -36,7 +36,7 @@ export class Sprite_Loading extends Sprite {
     });
 
     this._graphics = new PIXI.Graphics;
-    this._text = new PIXI.Text('偷偷地加载资源', style);
+    this._text = new PIXI.Text('正在努力缓存游戏数据', style);
     this._detail_text = new PIXI.Text(this._detail, style);
 
     this._container.addChild(this._graphics);
@@ -46,16 +46,19 @@ export class Sprite_Loading extends Sprite {
     this._text.anchor.set(0.5);
     this._detail_text.anchor.set(0.5);
     
-    this.platformManager.resize$.subscribe(() => {
-      this._text.x = this.app.renderer.screen.width / 2;
-      this._text.y = this.app.renderer.screen.height / 2;
-      this._graphics.x = (this.app.renderer.screen.width - LOADING_BAR_WIDTH) / 2
-      this._graphics.y = this.app.renderer.screen.height / 2 + 20;
-      this._detail_text.x = this.app.renderer.screen.width / 2;
-      this._detail_text.y = this.app.renderer.screen.height / 2 + 45;
-    });
+    this.platformManager.resize$.subscribe(() => this.update_position());
+    this.update_position();
 
     this.update_progress();
+  }
+
+  private update_position() {
+    this._text.x = this.app.renderer.screen.width / 2;
+    this._text.y = this.app.renderer.screen.height / 2;
+    this._graphics.x = (this.app.renderer.screen.width - LOADING_BAR_WIDTH) / 2
+    this._graphics.y = this.app.renderer.screen.height / 2 + 20;
+    this._detail_text.x = this.app.renderer.screen.width / 2;
+    this._detail_text.y = this.app.renderer.screen.height / 2 + 45;
   }
 
   onDestroy() {

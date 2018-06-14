@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 import { Subject } from 'rxjs';
 
 export const GAME_STORAGE = (name: string) => {
-  return function classDecorator<T extends { new(...args:any[]): GameStoreBase }>(constructor:T) {
+  return function classDecorator<T extends { new(...args): GameStoreBase }>(constructor:T) {
     let _c = class extends constructor {
       constructor(...args) {
         super(...args.concat([name]));

@@ -56,9 +56,9 @@ export class Scene extends SubscriptionManaged {
   }
 
   onDestroy() {
-    this.ticker.destroy();
     this.spriteManager.onDestroy();
     this._graphics.destroy();
     this.stage.destroy();
+    this.ticker.destroy();
   }
 }

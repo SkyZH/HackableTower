@@ -24,7 +24,7 @@ export class Interpreter extends Injectable {
   public check_item(options_item: any) : boolean {
     let result = true;
     _.forOwn(options_item, (value: number, key) => {
-      if (this.GAME_STORAGE.Item.get(key) + value >= 0) {
+      if (this.GAME_STORAGE.Item.get(key) + value < 0) {
         result = false;
       }
     });

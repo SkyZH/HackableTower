@@ -25,7 +25,7 @@ export class PlatformManager extends Injectable {
 
   private onResize = () => {
     const [_width, _height] = bound();
-    this.app.renderer.resize(_width, _height);
+    // this.app.renderer.resize(_width, _height);
   }
 
   public requestExitFullscreen() { requestExitFullscreen(); }

@@ -7,6 +7,9 @@ import { MAP_DATA, MapEvent } from '../../data';
 import { MAP_RESOURCE } from '../resources';
 import { GameStorage } from '../../store';
 import { Interpreter, Interpreter_Action } from '../interpreter';
+import { Window_Actor } from './window_actor';
+import { Window_Command, Window } from '../sprite';
+import { Command } from '../models';
 
 @PRELOAD_RESOURCE({
   sound: ['POL-perfect-engineering-short.wav', 'walking.wav']
@@ -20,6 +23,7 @@ export class Scene_Game extends Scene {
   protected INTERPRETER: Interpreter;
 
   private _map: Map;
+  private _actorWindow: Window_Actor;
   private _actor: Character_Actor;
 
   private _lock_walk: boolean;
@@ -38,14 +42,39 @@ export class Scene_Game extends Scene {
     super.onInit();
     this.audioManager.playBGM(this.resourceManager.Sound('POL-perfect-engineering-short.wav'));
     this.addMap();
+    this.addActorWindow();
+    this.addMenuWindow();
     this._lock_walk = false;
     this.bindEvents();
   }
 
-  public addMap() {
+  private addMap() {
     this._map = this.injector.init(Map)(_.clone(MAP_DATA.MAP_0), this.injector.create(Character_Actor));
     this._map.actorStat = { x: this.GAME_STORAGE.Actor.x, y: this.GAME_STORAGE.Actor.y, direction: this.GAME_STORAGE.Actor.direction };
     this.spriteManager.add(this._map);
+  }
+
+  private addActorWindow() {
+    const actorWindow = this.injector.create(Window_Actor);
+    this.spriteManager.add(actorWindow);
+    this.resize$.subscribe(() => {
+      actorWindow.x = (this.viewport.width - this._map.width) / 2 - actorWindow.width + 180;
+      actorWindow.y = (this.viewport.height - this._map.height) / 2;
+    });
+  }
+
+  private addMenuWindow() {
+    const menuWindow = this.injector.create(Window_Command);
+    this.spriteManager.add(menuWindow);
+    menuWindow.commands = ([
+      <Command> { name: '菜单', cb: () => this.sceneManager.pop() },
+      <Command> { name: '退出', cb: () => this.sceneManager.pop() },
+    ]);
+    menuWindow.width = 200;
+    this.resize$.subscribe(() => {
+      menuWindow.x = (this.viewport.width - this._map.width) / 2 - 200 + 180;
+      menuWindow.y = (this.viewport.height - this._map.height) / 2 + 310;
+    });
   }
 
   private _connection: boolean[][];
@@ -137,6 +166,7 @@ export class Scene_Game extends Scene {
   public onEnd() {
     super.onEnd();
     this.audioManager.stopBGM();
+    this.audioManager.stopME();
     this.stage.interactive = false;
   }
 }

@@ -20,7 +20,7 @@ export class GameStorage extends Injectable {
     this.injector.provide(GameStorage, this);
   }
 
-  private getDefault <T extends GameStoreBase> (_cls: { new(...args: any[]): T }) {
+  private getDefault <T extends GameStoreBase> (_cls: { new(...args): T }) {
     let _s = Reflect.getMetadata('hackabletower:storage', _cls);
     let _obj = {};
     _obj[_s] = _cls['DEFAULT'];

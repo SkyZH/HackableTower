@@ -33,11 +33,19 @@ export class Window_Command extends Window_Selectable {
       fontSize: FONT.FONT_SIZE_TITLE
     });
     this.selected = -1;
+
+    this.window_container.on('mousemove', (e: PIXI.interaction.InteractionEvent) => {
+      this.check_pos(e.data.global);
+    });
+    this.window_container.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
+      this.check_pos(e.data.global);
+      let cb = this._commands[this.selected].cb;
+      if (cb) cb();
+    });
   }
 
   public set commands(commands: Array<Command>) {
     this._commands = commands;
-    this.baseSet('height', this.height);
     this.update_text();
     this.selected = -1;
     this.update_selection();
@@ -47,14 +55,10 @@ export class Window_Command extends Window_Selectable {
     return this._commands;
   }
 
-  public get height() {
-    return (FONT.FONT_TITLE_LINE_HEIGHT + WINDOW.WINDOW_COMMAND_MARGIN) * (this._commands ? this._commands.length : 0) +  WINDOW.WINDOW_MARGIN_Y * 2 - WINDOW.WINDOW_COMMAND_MARGIN;
-  }
-
   private get_text(text: string, pos: number) {
     const commandText = new PIXI.Text(text, this._style);
-    commandText.x = this.x + WINDOW.WINDOW_MARGIN_X + WINDOW.WINDOW_COMMAND_PADDING_X;
-    commandText.y = this.y + pos * (FONT.FONT_TITLE_LINE_HEIGHT + WINDOW.WINDOW_COMMAND_MARGIN) + WINDOW.WINDOW_MARGIN_Y;
+    commandText.x = WINDOW.WINDOW_MARGIN_X + WINDOW.WINDOW_COMMAND_PADDING_X;
+    commandText.y = pos * (FONT.FONT_TITLE_LINE_HEIGHT + WINDOW.WINDOW_COMMAND_MARGIN) + WINDOW.WINDOW_MARGIN_Y;
     return commandText;
   }
 
@@ -102,55 +106,51 @@ export class Window_Command extends Window_Selectable {
   public onInit() {
     super.onInit();
 
-    this._container.interactive = true;
-    
-    this._container.addChild(this.commands_container);
+    this.window_container.interactive = true;
+    this.window_container.addChild(this.commands_container);
 
-    this._container.on('mousemove', (e: PIXI.interaction.InteractionEvent) => {
-      this.check_pos(e.data.global);
-    });
-    this._container.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
-      this.check_pos(e.data.global);
-      let cb = this._commands[this.selected].cb;
-      if (cb) cb();
-    });
-    this.update_text();
-    this.update_selection();
+    this.update_window();
   }
 
   public onDestroy() {
-    this._container.interactive = false;
-    this._container.removeChild(this.commands_container);
+    this.window_container.interactive = false;
+    this.window_container.removeChild(this.commands_container);
     this.commands_container.destroy();
     super.onDestroy();
   }
 
   public setBound(_bound: PIXI.Rectangle) { 
     super.setBound(_bound);
-    this.update_text();
-    this.update_selection();
+    this.update_window();
   }
 
   public set x(x: number) {
-    this.baseSet('x', x);
-    this.update_text();
-    this.update_selection();
+    this._bound.x = x;
+    this.update_window();
   }
   public set y(y: number) {
-    this.baseSet('y', y);
-    this.update_text();
-    this.update_selection();
+    this._bound.y = y;
+    this.update_window();
   }
   
   public set width(width: number) {
-    this.baseSet('width', width);
-    this.update_text();
-    this.update_selection();
+    this._bound.width = width;
+    this.update_window();
   }
   
   public set height(height: number) { throw new Error('command window height not settable'); }
 
-  public get x(): number { return this.baseGet('x'); }
-  public get y(): number { return this.baseGet('y'); }
-  public get width(): number { return this.baseGet('width'); }
+  public get x(): number { return this._bound.x; }
+  public get y(): number { return this._bound.y; }
+  public get width(): number { return this._bound.width; }
+  
+  public get height() {
+    return (FONT.FONT_TITLE_LINE_HEIGHT + WINDOW.WINDOW_COMMAND_MARGIN) * (this._commands ? this._commands.length : 0) +  WINDOW.WINDOW_MARGIN_Y * 2 - WINDOW.WINDOW_COMMAND_MARGIN;
+  }
+
+  protected update_window() {
+    super.update_window();
+    this.update_text();
+    this.update_selection();
+  }
 }

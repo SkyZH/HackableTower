@@ -14,7 +14,7 @@ export class Storage_Item extends GameStoreBase {
   public static get DEFAULT() {
     return {
       key_blue: 0,
-      key_yellow: 1,
+      key_orange: 1,
       key_red: 0
     };
   }

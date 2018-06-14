@@ -11,10 +11,10 @@ export class SubscriptionManaged extends Injectable {
     this.subscriptions = new Array<Subscription>();
   }
 
-  protected sub(subscription: Subscription) {
+  public sub(subscription: Subscription) {
     this.subscriptions.push(subscription);
   }
-  protected unsub() {
+  public unsub() {
     _.forEach(this.subscriptions, (sub: Subscription) => sub.unsubscribe());
   }
 }

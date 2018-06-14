@@ -31,7 +31,7 @@ export class Main_Test_Game extends Injectable {
   constructor(baseInjector: Injector) {
     super(baseInjector);
     this.sceneManager = this.injector.resolve(SceneManager);
-    this.sceneManager.push(Scene_Game);
+    this.sceneManager.push(DEFAULT_SCENE);
   }
 }
 

@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { Observable, Subscriber } from 'rxjs';
+import { Observable, Subscriber, timer } from 'rxjs';
 import { Scene } from '../models';
 import { App } from '../app';
 import { ResourceManager } from './resource_manager';
@@ -50,6 +50,7 @@ export class SceneManager extends Injectable {
   private startScene(scene: Scene): Observable<any> {
     return new Observable((subscriber: Subscriber<any>) => {
       this.app.stage.addChild(this._loadingSprite.container);
+      this._loadingSprite.container.alpha = 1;
       let total = this.resourceManager.queueSize;
       this._loadingSprite.progress = 0;
       this._loadingSprite.error = false;
@@ -59,7 +60,7 @@ export class SceneManager extends Injectable {
         }, 
         () => this._loadingSprite.error = true, 
         () => {
-          this.app.stage.removeChild(this._loadingSprite.container);
+          this._loadingSprite.progress = 1;
           scene.stage.alpha = 0;
           scene.onInit();
           scene.onStart();
@@ -68,10 +69,14 @@ export class SceneManager extends Injectable {
             __cnt++;
             if (__cnt >= 20) {
               scene.stage.alpha = 1;
+              this.app.stage.removeChild(this._loadingSprite.container);
               this.ticker.remove(tick);
               subscriber.next();
               subscriber.complete();
-            } else scene.stage.alpha = __cnt / 20;
+            } else {
+              scene.stage.alpha = __cnt / 20;
+              this._loadingSprite.container.alpha = 1 - __cnt / 20;
+            }
           };
           this.ticker.add(tick);
         }

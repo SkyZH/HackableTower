@@ -56,7 +56,7 @@ export abstract class Character extends Tileset {
     super.onDestroy();
   }
 
-  private update_character = (d?) => {
+  private update_character = () => {
     let __frame = this._direction * 4;
     if (this._status == CHARACTER_STATUS.WALKING) {
       __frame += Math.floor((this._ticker.lastTime - this._animationStart) / CHARACTER.CHARACTER_SPRITE_SPEED_WALK) % 4;

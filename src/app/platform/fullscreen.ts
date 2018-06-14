@@ -3,7 +3,7 @@ export const requestFullscreen = () => {
     rfs = el['requestFullscreen']
       || el['webkitRequestFullScreen']
       || el['mozRequestFullScreen']
-      || el['msRequestFullscreen ']
+      || el['msRequestFullscreen']
   ;
 
   rfs.call(el);
@@ -14,7 +14,7 @@ export const requestExitFullscreen = () => {
     rfs = el['exitFullscreen']
       || el['webkitExitFullscreen']
       || el['mozCancelFullScreen']
-      || el['msExitFullscreen ']
+      || el['msExitFullscreen']
   ;
 
   rfs.call(el);
